@@ -16,8 +16,8 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 // Default credentials
-const VALID_EMAIL = 'admin@diallo.com';
-const VALID_PASSWORD = 'ferme2024';
+const VALID_EMAIL = 'admin@gmail.com';
+const VALID_PASSWORD = 'admin@gmail.com';
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(() => {
