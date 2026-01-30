@@ -123,7 +123,7 @@ const Login = () => {
           <p className="text-sm text-muted-foreground">
             <span className="font-medium text-foreground">Identifiants de démo:</span>
             <br />
-            admin@diallo.com / ferme2024
+            admin@gmail.com / admin@gmail.com
           </p>
         </div>
       </div>
