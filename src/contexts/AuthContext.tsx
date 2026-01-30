@@ -17,7 +17,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 // Default credentials
 const VALID_EMAIL = 'admin@gmail.com';
-const VALID_PASSWORD = 'admin@gmail.com';
+const VALID_PASSWORD = 'Di@llo2026';
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(() => {
