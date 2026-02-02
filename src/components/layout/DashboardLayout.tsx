@@ -10,9 +10,9 @@ const DashboardLayout = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background flex">
+    <div className="min-h-screen bg-muted/30 flex">
       <Sidebar />
-      <main className="flex-1 ml-80 p-16 animate-fade-in">
+      <main className="flex-1 ml-72 p-8 animate-fade-in">
         <Outlet />
       </main>
     </div>
