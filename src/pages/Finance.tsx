@@ -1,6 +1,8 @@
 import { useState } from 'react';
-import { TrendingUp, TrendingDown, Wallet, Plus, ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import { TrendingUp, TrendingDown, Wallet, Plus, ArrowUpRight, ArrowDownRight, ShieldAlert } from 'lucide-react';
 import Header from '@/components/layout/Header';
+import { useAuth } from '@/contexts/AuthContext';
+import { Navigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -38,6 +40,7 @@ const initialTransactions: Transaction[] = [
 ];
 
 const Finance = () => {
+  const { hasAccess } = useAuth();
   const [transactions, setTransactions] = useState<Transaction[]>(initialTransactions);
   const [isOpen, setIsOpen] = useState(false);
   const [newTransaction, setNewTransaction] = useState({
@@ -46,6 +49,11 @@ const Finance = () => {
     amount: '',
     category: '',
   });
+
+  // Restrict access for gestionnaire
+  if (!hasAccess('finance')) {
+    return <Navigate to="/dashboard" replace />;
+  }
 
   const totalRevenus = transactions
     .filter(t => t.type === 'revenu')

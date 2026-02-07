@@ -6,22 +6,29 @@ import {
   BarChart3, 
   Package, 
   LogOut,
-  Home
+  Home,
+  LayoutDashboard,
+  UserCheck
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 
-const navItems = [
-  { icon: Users, label: 'Gestion des Utilisateurs', path: '/dashboard' },
-  { icon: Wallet, label: 'Gestion Financière', path: '/dashboard/finance' },
-  { icon: Settings, label: 'Paramètres du Système', path: '/dashboard/parametres' },
-  { icon: BarChart3, label: 'Rapports Avancés', path: '/dashboard/rapports' },
-  { icon: Package, label: 'Gestion des Stocks Maîtres', path: '/dashboard/stocks' },
-];
-
 const Sidebar = () => {
-  const { logout, user } = useAuth();
+  const { logout, user, hasAccess } = useAuth();
   const navigate = useNavigate();
+
+  const allNavItems = [
+    { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard', section: 'dashboard' },
+    { icon: Users, label: 'Gestion des Utilisateurs', path: '/dashboard/utilisateurs', section: 'utilisateurs' },
+    { icon: UserCheck, label: 'Clients', path: '/dashboard/clients', section: 'clients' },
+    { icon: Wallet, label: 'Gestion Financière', path: '/dashboard/finance', section: 'finance' },
+    { icon: Package, label: 'Gestion des Stocks', path: '/dashboard/stocks', section: 'stocks' },
+    { icon: BarChart3, label: 'Rapports Avancés', path: '/dashboard/rapports', section: 'rapports' },
+    { icon: Settings, label: 'Paramètres', path: '/dashboard/parametres', section: 'parametres' },
+  ];
+
+  // Filter nav items based on role access
+  const navItems = allNavItems.filter(item => hasAccess(item.section));
 
   const handleLogout = () => {
     logout();
@@ -34,21 +41,21 @@ const Sidebar = () => {
       <div className="p-5 border-b border-border">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-success flex items-center justify-center">
-            <Home className="text-white" size={20} />
+            <Home className="text-success-foreground" size={20} />
           </div>
           <div>
             <h1 className="font-bold text-base text-foreground">
               Ferme Diallo
             </h1>
-            <p className="text-xs text-muted-foreground">
-              Administrateur
+            <p className="text-xs text-muted-foreground capitalize">
+              {user?.role || 'Fermier'}
             </p>
           </div>
         </div>
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 p-3 space-y-1">
+      <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
         {navItems.map((item) => (
           <NavLink
             key={item.path}
@@ -71,7 +78,7 @@ const Sidebar = () => {
       {/* User Info & Logout */}
       <div className="p-4 border-t border-border">
         <p className="text-xs text-muted-foreground mb-1">Connecté en tant que</p>
-        <p className="text-sm font-medium text-foreground mb-3">{user?.email || 'admin@gmail.com'}</p>
+        <p className="text-sm font-medium text-foreground mb-3">{user?.name || 'Utilisateur'}</p>
         <Button
           variant="ghost"
           onClick={handleLogout}
