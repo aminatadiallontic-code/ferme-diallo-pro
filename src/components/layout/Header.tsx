@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Bell, ChevronDown, Package, DollarSign, AlertTriangle } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Bell, Settings, ChevronDown, Package, DollarSign, AlertTriangle } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import {
   DropdownMenu,
@@ -43,6 +44,7 @@ const notifications = [
 
 const Header = ({ title }: HeaderProps) => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [hasUnread, setHasUnread] = useState(true);
 
   const handleNotificationClick = () => {
@@ -57,7 +59,17 @@ const Header = ({ title }: HeaderProps) => {
       </h1>
 
       {/* Right side */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-3">
+        {/* Settings Icon */}
+        <Button
+          variant="ghost"
+          size="icon"
+          className="btn-press"
+          onClick={() => navigate('/dashboard/parametres')}
+        >
+          <Settings size={22} />
+        </Button>
+
         {/* Notifications */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -122,18 +134,15 @@ const Header = ({ title }: HeaderProps) => {
                 <p className="font-medium text-foreground text-sm">
                   {user?.name || 'Mamadou Diallo'}
                 </p>
-                <p className="text-xs text-muted-foreground">
-                  {user?.role || 'Administrateur'}
+                <p className="text-xs text-muted-foreground capitalize">
+                  {user?.role || 'Fermier'}
                 </p>
               </div>
               <ChevronDown size={16} className="text-muted-foreground" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-48 rounded-xl">
-            <DropdownMenuItem className="rounded-lg">
-              Mon profil
-            </DropdownMenuItem>
-            <DropdownMenuItem className="rounded-lg">
+            <DropdownMenuItem className="rounded-lg" onClick={() => navigate('/dashboard/parametres')}>
               Paramètres
             </DropdownMenuItem>
           </DropdownMenuContent>

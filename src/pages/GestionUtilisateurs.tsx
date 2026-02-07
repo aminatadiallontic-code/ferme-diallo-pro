@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Search, UserPlus, Users, TrendingUp, Home, Activity, Edit, Trash2 } from 'lucide-react';
+import Header from '@/components/layout/Header';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -73,15 +74,7 @@ const GestionUtilisateurs = () => {
 
   return (
     <div className="animate-fade-in">
-      {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-foreground mb-1">
-          Gestion des Utilisateurs
-        </h1>
-        <p className="text-muted-foreground">
-          Gérez les utilisateurs et leurs permissions
-        </p>
-      </div>
+      <Header title="Gestion des Utilisateurs" />
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
