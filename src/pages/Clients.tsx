@@ -1,7 +1,19 @@
 import { useState } from 'react';
-import { Search, Phone, Mail, MapPin, ShoppingBag } from 'lucide-react';
+import { Search, Phone, Mail, MapPin, ShoppingBag, Plus } from 'lucide-react';
 import Header from '@/components/layout/Header';
 import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
+import { useToast } from '@/hooks/use-toast';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+  DialogClose,
+} from '@/components/ui/dialog';
 
 interface Client {
   id: number;
@@ -25,7 +37,40 @@ const initialClients: Client[] = [
 
 const Clients = () => {
   const [search, setSearch] = useState('');
-  const [clients] = useState<Client[]>(initialClients);
+  const [clients, setClients] = useState<Client[]>(initialClients);
+  const [open, setOpen] = useState(false);
+  const [newClient, setNewClient] = useState({ name: '', phone: '', email: '', address: '' });
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const { toast } = useToast();
+
+  const validate = () => {
+    const errs: Record<string, string> = {};
+    if (!newClient.name.trim()) errs.name = 'Le nom est requis';
+    if (!newClient.phone.trim()) errs.phone = 'Le téléphone est requis';
+    if (newClient.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newClient.email)) errs.email = 'Email invalide';
+    if (!newClient.address.trim()) errs.address = "L'adresse est requise";
+    setErrors(errs);
+    return Object.keys(errs).length === 0;
+  };
+
+  const handleAddClient = () => {
+    if (!validate()) return;
+    const client: Client = {
+      id: Math.max(...clients.map(c => c.id), 0) + 1,
+      name: newClient.name.trim(),
+      phone: newClient.phone.trim(),
+      email: newClient.email.trim(),
+      address: newClient.address.trim(),
+      totalOrders: 0,
+      lastOrder: new Date().toISOString().split('T')[0],
+      totalSpent: 0,
+    };
+    setClients(prev => [client, ...prev]);
+    setNewClient({ name: '', phone: '', email: '', address: '' });
+    setErrors({});
+    setOpen(false);
+    toast({ title: 'Client ajouté', description: `${client.name} a été ajouté avec succès.` });
+  };
 
   const filteredClients = clients.filter(c =>
     c.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -39,7 +84,71 @@ const Clients = () => {
 
   return (
     <div className="animate-slide-in">
-      <Header title="Clients" />
+      <div className="flex items-center justify-between mb-2">
+        <Header title="Clients" />
+        <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) { setErrors({}); setNewClient({ name: '', phone: '', email: '', address: '' }); } }}>
+          <DialogTrigger asChild>
+            <Button className="rounded-2xl gap-2">
+              <Plus size={18} />
+              Nouveau client
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Ajouter un client</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-2">
+              <div className="space-y-2">
+                <Label htmlFor="client-name">Nom complet *</Label>
+                <Input
+                  id="client-name"
+                  placeholder="Ex: Ousmane Ba"
+                  value={newClient.name}
+                  onChange={(e) => setNewClient(p => ({ ...p, name: e.target.value }))}
+                />
+                {errors.name && <p className="text-sm text-destructive">{errors.name}</p>}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="client-phone">Téléphone *</Label>
+                <Input
+                  id="client-phone"
+                  placeholder="Ex: +221 77 123 45 67"
+                  value={newClient.phone}
+                  onChange={(e) => setNewClient(p => ({ ...p, phone: e.target.value }))}
+                />
+                {errors.phone && <p className="text-sm text-destructive">{errors.phone}</p>}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="client-email">Email</Label>
+                <Input
+                  id="client-email"
+                  type="email"
+                  placeholder="Ex: ousmane@mail.com"
+                  value={newClient.email}
+                  onChange={(e) => setNewClient(p => ({ ...p, email: e.target.value }))}
+                />
+                {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="client-address">Adresse *</Label>
+                <Input
+                  id="client-address"
+                  placeholder="Ex: Dakar, Médina"
+                  value={newClient.address}
+                  onChange={(e) => setNewClient(p => ({ ...p, address: e.target.value }))}
+                />
+                {errors.address && <p className="text-sm text-destructive">{errors.address}</p>}
+              </div>
+            </div>
+            <DialogFooter>
+              <DialogClose asChild>
+                <Button variant="outline">Annuler</Button>
+              </DialogClose>
+              <Button onClick={handleAddClient}>Ajouter</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </div>
 
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
