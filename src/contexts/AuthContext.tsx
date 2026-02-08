@@ -58,7 +58,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const hasAccess = useCallback((section: string): boolean => {
     if (!user) return false;
-    const restrictions = ROLE_RESTRICTIONS[user.role];
+    const restrictions = ROLE_RESTRICTIONS[user.role] || [];
     return !restrictions.includes(section);
   }, [user]);
 
