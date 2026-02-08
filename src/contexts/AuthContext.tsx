@@ -2,6 +2,13 @@ import React, { createContext, useContext, useState, useCallback, ReactNode } fr
 
 export type UserRole = 'fermier' | 'gestionnaire';
 
+interface UserCredentials {
+  email: string;
+  password: string;
+  name: string;
+  role: UserRole;
+}
+
 interface User {
   email: string;
   name: string;
@@ -14,20 +21,23 @@ interface AuthContextType {
   login: (email: string, password: string) => boolean;
   logout: () => void;
   hasAccess: (section: string) => boolean;
+  addUser: (userData: UserCredentials) => void;
+  getAllUsers: () => UserCredentials[];
+  removeUser: (email: string) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Credentials per role
-const USERS: { email: string; password: string; name: string; role: UserRole }[] = [
+// Default credentials
+const DEFAULT_USERS: UserCredentials[] = [
   { email: 'admin@gmail.com', password: 'Di@llo2026', name: 'Mamadou Diallo', role: 'fermier' },
   { email: 'gestionnaire@gmail.com', password: 'Gest@2026', name: 'Ibrahima Sow', role: 'gestionnaire' },
 ];
 
-// Gestionnaire cannot see Finance (gains/sorties d'argent)
+// Gestionnaire: restricted from dashboard, utilisateurs, finance, parametres
 const ROLE_RESTRICTIONS: Record<UserRole, string[]> = {
   fermier: [], // Full access
-  gestionnaire: ['finance'], // Cannot see finance
+  gestionnaire: ['finance', 'dashboard', 'utilisateurs', 'parametres'],
 };
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -36,14 +46,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return stored ? JSON.parse(stored) : null;
   });
 
+  const [extraUsers, setExtraUsers] = useState<UserCredentials[]>(() => {
+    const stored = localStorage.getItem('ferme_diallo_extra_users');
+    return stored ? JSON.parse(stored) : [];
+  });
+
+  const allCredentials = [...DEFAULT_USERS, ...extraUsers];
+
   const login = useCallback((email: string, password: string): boolean => {
-    const found = USERS.find(u => u.email === email && u.password === password);
+    const allUsers = [...DEFAULT_USERS, ...(JSON.parse(localStorage.getItem('ferme_diallo_extra_users') || '[]'))];
+    const found = allUsers.find((u: UserCredentials) => u.email === email && u.password === password);
     if (found) {
-      const userData: User = {
-        email: found.email,
-        name: found.name,
-        role: found.role,
-      };
+      const userData: User = { email: found.email, name: found.name, role: found.role };
       setUser(userData);
       localStorage.setItem('ferme_diallo_user', JSON.stringify(userData));
       return true;
@@ -62,8 +76,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return !restrictions.includes(section);
   }, [user]);
 
+  const addUser = useCallback((userData: UserCredentials) => {
+    setExtraUsers(prev => {
+      const updated = [...prev, userData];
+      localStorage.setItem('ferme_diallo_extra_users', JSON.stringify(updated));
+      return updated;
+    });
+  }, []);
+
+  const getAllUsers = useCallback((): UserCredentials[] => {
+    const stored = JSON.parse(localStorage.getItem('ferme_diallo_extra_users') || '[]');
+    return [...DEFAULT_USERS, ...stored];
+  }, []);
+
+  const removeUser = useCallback((email: string) => {
+    // Cannot remove default users
+    if (DEFAULT_USERS.some(u => u.email === email)) return;
+    setExtraUsers(prev => {
+      const updated = prev.filter(u => u.email !== email);
+      localStorage.setItem('ferme_diallo_extra_users', JSON.stringify(updated));
+      return updated;
+    });
+  }, []);
+
   return (
-    <AuthContext.Provider value={{ user, isAuthenticated: !!user, login, logout, hasAccess }}>
+    <AuthContext.Provider value={{ user, isAuthenticated: !!user, login, logout, hasAccess, addUser, getAllUsers, removeUser }}>
       {children}
     </AuthContext.Provider>
   );

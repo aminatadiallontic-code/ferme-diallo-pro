@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Navigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -11,8 +12,11 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { toast } from 'sonner';
+import { useAuth } from '@/contexts/AuthContext';
+import Header from '@/components/layout/Header';
 
 const Parametres = () => {
+  const { hasAccess } = useAuth();
   const [systemName, setSystemName] = useState('Ferme Diallo');
   const [notificationEmail, setNotificationEmail] = useState('admin@fermediallo.com');
   const [timezone, setTimezone] = useState('Europe/Paris');
@@ -22,28 +26,25 @@ const Parametres = () => {
   const [dataRetention, setDataRetention] = useState('12');
   const [maintenanceMode, setMaintenanceMode] = useState(false);
 
+  // Gestionnaire cannot access parametres
+  if (!hasAccess('parametres')) {
+    return <Navigate to="/dashboard/clients" replace />;
+  }
+
   const handleSave = () => {
     toast.success('Paramètres enregistrés avec succès');
   };
 
   return (
     <div className="animate-fade-in">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-foreground mb-1">
-          Paramètres du Système
-        </h1>
-        <p className="text-muted-foreground">
-          Configurez les paramètres du système
-        </p>
-      </div>
+      <Header title="Paramètres" />
 
-      <div className="bg-card rounded-2xl p-8 border border-border">
+      <div className="bg-card rounded-2xl p-4 md:p-8 border border-border">
         <h2 className="text-xl font-semibold text-foreground mb-6">
           Paramètres généraux
         </h2>
 
         <div className="space-y-6 max-w-2xl">
-          {/* Nom du système */}
           <div className="space-y-2">
             <Label htmlFor="systemName" className="text-foreground font-medium">
               Nom du système
@@ -56,7 +57,6 @@ const Parametres = () => {
             />
           </div>
 
-          {/* Email de notification */}
           <div className="space-y-2">
             <Label htmlFor="email" className="text-foreground font-medium">
               Email de notification
@@ -70,11 +70,8 @@ const Parametres = () => {
             />
           </div>
 
-          {/* Fuseau horaire */}
           <div className="space-y-2">
-            <Label className="text-foreground font-medium">
-              Fuseau horaire
-            </Label>
+            <Label className="text-foreground font-medium">Fuseau horaire</Label>
             <Select value={timezone} onValueChange={setTimezone}>
               <SelectTrigger className="h-12 rounded-xl bg-secondary border-0">
                 <SelectValue />
@@ -88,11 +85,8 @@ const Parametres = () => {
             </Select>
           </div>
 
-          {/* Langue */}
           <div className="space-y-2">
-            <Label className="text-foreground font-medium">
-              Langue
-            </Label>
+            <Label className="text-foreground font-medium">Langue</Label>
             <Select value={language} onValueChange={setLanguage}>
               <SelectTrigger className="h-12 rounded-xl bg-secondary border-0">
                 <SelectValue />
@@ -105,35 +99,22 @@ const Parametres = () => {
             </Select>
           </div>
 
-          {/* Notifications */}
           <div className="flex items-center justify-between py-2">
             <Label htmlFor="notifications" className="text-foreground font-medium cursor-pointer">
               Notifications
             </Label>
-            <Switch
-              id="notifications"
-              checked={notifications}
-              onCheckedChange={setNotifications}
-            />
+            <Switch id="notifications" checked={notifications} onCheckedChange={setNotifications} />
           </div>
 
-          {/* Rapports automatiques */}
           <div className="flex items-center justify-between py-2">
             <Label htmlFor="autoReports" className="text-foreground font-medium cursor-pointer">
               Rapports automatiques
             </Label>
-            <Switch
-              id="autoReports"
-              checked={autoReports}
-              onCheckedChange={setAutoReports}
-            />
+            <Switch id="autoReports" checked={autoReports} onCheckedChange={setAutoReports} />
           </div>
 
-          {/* Rétention des données */}
           <div className="space-y-2">
-            <Label className="text-foreground font-medium">
-              Rétention des données (mois)
-            </Label>
+            <Label className="text-foreground font-medium">Rétention des données (mois)</Label>
             <Select value={dataRetention} onValueChange={setDataRetention}>
               <SelectTrigger className="h-12 rounded-xl bg-secondary border-0">
                 <SelectValue />
@@ -147,23 +128,17 @@ const Parametres = () => {
             </Select>
           </div>
 
-          {/* Mode maintenance */}
           <div className="flex items-center justify-between py-2">
             <Label htmlFor="maintenance" className="text-foreground font-medium cursor-pointer">
               Mode maintenance
             </Label>
-            <Switch
-              id="maintenance"
-              checked={maintenanceMode}
-              onCheckedChange={setMaintenanceMode}
-            />
+            <Switch id="maintenance" checked={maintenanceMode} onCheckedChange={setMaintenanceMode} />
           </div>
 
-          {/* Save Button */}
           <div className="pt-4">
             <Button
               onClick={handleSave}
-              className="h-12 px-8 rounded-xl font-semibold bg-[hsl(160,84%,39%)] hover:bg-[hsl(160,84%,35%)] text-white btn-press"
+              className="h-12 px-8 rounded-xl font-semibold bg-success hover:bg-success/90 text-white btn-press"
             >
               Enregistrer les modifications
             </Button>
