@@ -84,13 +84,14 @@ const Clients = () => {
 
   return (
     <div className="animate-slide-in">
-      <div className="flex items-center justify-between mb-2">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-2">
         <Header title="Clients" />
         <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) { setErrors({}); setNewClient({ name: '', phone: '', email: '', address: '' }); } }}>
           <DialogTrigger asChild>
-            <Button className="rounded-2xl gap-2">
+            <Button className="rounded-2xl gap-2 shrink-0">
               <Plus size={18} />
-              Nouveau client
+              <span className="hidden sm:inline">Nouveau client</span>
+              <span className="sm:hidden">Ajouter</span>
             </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-md">
@@ -100,43 +101,22 @@ const Clients = () => {
             <div className="space-y-4 py-2">
               <div className="space-y-2">
                 <Label htmlFor="client-name">Nom complet *</Label>
-                <Input
-                  id="client-name"
-                  placeholder="Ex: Ousmane Ba"
-                  value={newClient.name}
-                  onChange={(e) => setNewClient(p => ({ ...p, name: e.target.value }))}
-                />
+                <Input id="client-name" placeholder="Ex: Ousmane Ba" value={newClient.name} onChange={(e) => setNewClient(p => ({ ...p, name: e.target.value }))} />
                 {errors.name && <p className="text-sm text-destructive">{errors.name}</p>}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="client-phone">Téléphone *</Label>
-                <Input
-                  id="client-phone"
-                  placeholder="Ex: +221 77 123 45 67"
-                  value={newClient.phone}
-                  onChange={(e) => setNewClient(p => ({ ...p, phone: e.target.value }))}
-                />
+                <Input id="client-phone" placeholder="Ex: +221 77 123 45 67" value={newClient.phone} onChange={(e) => setNewClient(p => ({ ...p, phone: e.target.value }))} />
                 {errors.phone && <p className="text-sm text-destructive">{errors.phone}</p>}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="client-email">Email</Label>
-                <Input
-                  id="client-email"
-                  type="email"
-                  placeholder="Ex: ousmane@mail.com"
-                  value={newClient.email}
-                  onChange={(e) => setNewClient(p => ({ ...p, email: e.target.value }))}
-                />
+                <Input id="client-email" type="email" placeholder="Ex: ousmane@mail.com" value={newClient.email} onChange={(e) => setNewClient(p => ({ ...p, email: e.target.value }))} />
                 {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="client-address">Adresse *</Label>
-                <Input
-                  id="client-address"
-                  placeholder="Ex: Dakar, Médina"
-                  value={newClient.address}
-                  onChange={(e) => setNewClient(p => ({ ...p, address: e.target.value }))}
-                />
+                <Input id="client-address" placeholder="Ex: Dakar, Médina" value={newClient.address} onChange={(e) => setNewClient(p => ({ ...p, address: e.target.value }))} />
                 {errors.address && <p className="text-sm text-destructive">{errors.address}</p>}
               </div>
             </div>
@@ -151,26 +131,26 @@ const Clients = () => {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-8">
         <div className="stat-card">
-          <p className="text-sm text-muted-foreground mb-1">Total clients</p>
-          <p className="text-2xl font-black text-foreground">{clients.length}</p>
+          <p className="text-xs md:text-sm text-muted-foreground mb-1">Total clients</p>
+          <p className="text-xl md:text-2xl font-black text-foreground">{clients.length}</p>
         </div>
         <div className="stat-card">
-          <p className="text-sm text-muted-foreground mb-1">Commandes totales</p>
-          <p className="text-2xl font-black text-foreground">
+          <p className="text-xs md:text-sm text-muted-foreground mb-1">Commandes</p>
+          <p className="text-xl md:text-2xl font-black text-foreground">
             {clients.reduce((sum, c) => sum + c.totalOrders, 0)}
           </p>
         </div>
         <div className="stat-card">
-          <p className="text-sm text-muted-foreground mb-1">Chiffre d'affaires</p>
-          <p className="text-2xl font-black text-success">
+          <p className="text-xs md:text-sm text-muted-foreground mb-1">Chiffre d'affaires</p>
+          <p className="text-lg md:text-2xl font-black text-success">
             {formatAmount(clients.reduce((sum, c) => sum + c.totalSpent, 0))}
           </p>
         </div>
         <div className="stat-card">
-          <p className="text-sm text-muted-foreground mb-1">Moy. par client</p>
-          <p className="text-2xl font-black text-foreground">
+          <p className="text-xs md:text-sm text-muted-foreground mb-1">Moy. / client</p>
+          <p className="text-lg md:text-2xl font-black text-foreground">
             {formatAmount(Math.round(clients.reduce((sum, c) => sum + c.totalSpent, 0) / clients.length))}
           </p>
         </div>
@@ -180,7 +160,7 @@ const Clients = () => {
       <div className="relative mb-6">
         <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" size={20} />
         <Input
-          placeholder="Rechercher un client par nom, email ou téléphone..."
+          placeholder="Rechercher un client..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="h-12 pl-12 rounded-2xl bg-card border-border/50"
@@ -188,39 +168,39 @@ const Clients = () => {
       </div>
 
       {/* Client List */}
-      <div className="card-xl p-6">
+      <div className="card-xl p-4 md:p-6">
         <div className="space-y-4">
           {filteredClients.map((client) => (
             <div
               key={client.id}
-              className="p-5 rounded-2xl bg-secondary/50 hover:bg-secondary transition-colors"
+              className="p-4 md:p-5 rounded-2xl bg-secondary/50 hover:bg-secondary transition-colors"
             >
-              <div className="flex items-start justify-between">
+              <div className="flex flex-col md:flex-row md:items-start justify-between gap-3">
                 <div className="flex-1">
                   <h3 className="font-bold text-foreground text-lg">{client.name}</h3>
                   <div className="mt-2 space-y-1">
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Phone size={14} />
+                      <Phone size={14} className="shrink-0" />
                       <span>{client.phone}</span>
                     </div>
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Mail size={14} />
-                      <span>{client.email}</span>
+                      <Mail size={14} className="shrink-0" />
+                      <span className="truncate">{client.email}</span>
                     </div>
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <MapPin size={14} />
+                      <MapPin size={14} className="shrink-0" />
                       <span>{client.address}</span>
                     </div>
                   </div>
                 </div>
-                <div className="text-right">
+                <div className="text-left md:text-right">
                   <div className="flex items-center gap-2 mb-2">
                     <ShoppingBag size={16} className="text-success" />
                     <span className="font-bold text-foreground">{client.totalOrders} commandes</span>
                   </div>
                   <p className="text-lg font-black text-success">{formatAmount(client.totalSpent)}</p>
                   <p className="text-xs text-muted-foreground mt-1">
-                    Dernière commande: {new Date(client.lastOrder).toLocaleDateString('fr-FR')}
+                    Dernière: {new Date(client.lastOrder).toLocaleDateString('fr-FR')}
                   </p>
                 </div>
               </div>

@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Bell, Settings, ChevronDown, Package, DollarSign, AlertTriangle } from 'lucide-react';
+import { Bell, Settings, ChevronDown, Package, DollarSign, AlertTriangle, Menu } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useMobileSidebar } from '@/contexts/SidebarContext';
+import { useIsMobile } from '@/hooks/use-mobile';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -45,6 +47,8 @@ const notifications = [
 const Header = ({ title }: HeaderProps) => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
+  const { toggle: toggleSidebar } = useMobileSidebar();
   const [hasUnread, setHasUnread] = useState(true);
 
   const handleNotificationClick = () => {
@@ -52,23 +56,37 @@ const Header = ({ title }: HeaderProps) => {
   };
 
   return (
-    <header className="flex items-center justify-between mb-8">
-      {/* Title */}
-      <h1 className="text-4xl font-black tracking-tighter text-foreground">
-        {title}
-      </h1>
+    <header className="flex items-center justify-between mb-6 md:mb-8">
+      {/* Left side: menu + title */}
+      <div className="flex items-center gap-3">
+        {isMobile && toggleSidebar && (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="btn-press"
+            onClick={toggleSidebar}
+          >
+            <Menu size={24} />
+          </Button>
+        )}
+        <h1 className="text-2xl md:text-4xl font-black tracking-tighter text-foreground">
+          {title}
+        </h1>
+      </div>
 
       {/* Right side */}
-      <div className="flex items-center gap-3">
-        {/* Settings Icon */}
-        <Button
-          variant="ghost"
-          size="icon"
-          className="btn-press"
-          onClick={() => navigate('/dashboard/parametres')}
-        >
-          <Settings size={22} />
-        </Button>
+      <div className="flex items-center gap-2 md:gap-3">
+        {/* Settings Icon - hidden on mobile */}
+        {!isMobile && (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="btn-press"
+            onClick={() => navigate('/dashboard/parametres')}
+          >
+            <Settings size={22} />
+          </Button>
+        )}
 
         {/* Notifications */}
         <DropdownMenu>
@@ -121,32 +139,34 @@ const Header = ({ title }: HeaderProps) => {
           </DropdownMenuContent>
         </DropdownMenu>
 
-        {/* User Profile */}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="flex items-center gap-3 btn-press">
-              <Avatar className="h-10 w-10">
-                <AvatarFallback className="bg-primary text-primary-foreground font-semibold">
-                  {user?.name?.split(' ').map(n => n[0]).join('') || 'MD'}
-                </AvatarFallback>
-              </Avatar>
-              <div className="text-left hidden sm:block">
-                <p className="font-medium text-foreground text-sm">
-                  {user?.name || 'Mamadou Diallo'}
-                </p>
-                <p className="text-xs text-muted-foreground capitalize">
-                  {user?.role || 'Fermier'}
-                </p>
-              </div>
-              <ChevronDown size={16} className="text-muted-foreground" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-48 rounded-xl">
-            <DropdownMenuItem className="rounded-lg" onClick={() => navigate('/dashboard/parametres')}>
-              Paramètres
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        {/* User Profile - hidden on mobile */}
+        {!isMobile && (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="flex items-center gap-3 btn-press">
+                <Avatar className="h-10 w-10">
+                  <AvatarFallback className="bg-primary text-primary-foreground font-semibold">
+                    {user?.name?.split(' ').map(n => n[0]).join('') || 'MD'}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="text-left">
+                  <p className="font-medium text-foreground text-sm">
+                    {user?.name || 'Mamadou Diallo'}
+                  </p>
+                  <p className="text-xs text-muted-foreground capitalize">
+                    {user?.role === 'fermier' ? 'Administrateur' : user?.role || 'Fermier'}
+                  </p>
+                </div>
+                <ChevronDown size={16} className="text-muted-foreground" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48 rounded-xl">
+              <DropdownMenuItem className="rounded-lg" onClick={() => navigate('/dashboard/parametres')}>
+                Paramètres
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
       </div>
     </header>
   );

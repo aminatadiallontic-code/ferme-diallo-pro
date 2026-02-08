@@ -13,7 +13,12 @@ import {
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 
-const Sidebar = () => {
+interface SidebarProps {
+  isMobile?: boolean;
+  onNavClick?: () => void;
+}
+
+const Sidebar = ({ isMobile = false, onNavClick }: SidebarProps) => {
   const { logout, user, hasAccess } = useAuth();
   const navigate = useNavigate();
 
@@ -27,16 +32,20 @@ const Sidebar = () => {
     { icon: Settings, label: 'Paramètres', path: '/dashboard/parametres', section: 'parametres' },
   ];
 
-  // Filter nav items based on role access
   const navItems = allNavItems.filter(item => hasAccess(item.section));
 
   const handleLogout = () => {
+    onNavClick?.();
     logout();
     navigate('/');
   };
 
+  const handleNavClick = () => {
+    onNavClick?.();
+  };
+
   return (
-    <aside className="w-72 h-screen bg-card border-r border-border flex flex-col fixed left-0 top-0">
+    <aside className={`${isMobile ? 'w-full h-full' : 'w-72 h-screen fixed left-0 top-0'} bg-card border-r border-border flex flex-col`}>
       {/* Logo */}
       <div className="p-5 border-b border-border">
         <div className="flex items-center gap-3">
@@ -48,7 +57,7 @@ const Sidebar = () => {
               Ferme Diallo
             </h1>
             <p className="text-xs text-muted-foreground capitalize">
-              {user?.role || 'Fermier'}
+              {user?.role === 'fermier' ? 'Administrateur' : user?.role || 'Utilisateur'}
             </p>
           </div>
         </div>
@@ -61,6 +70,7 @@ const Sidebar = () => {
             key={item.path}
             to={item.path}
             end={item.path === '/dashboard'}
+            onClick={handleNavClick}
             className={({ isActive }) =>
               `flex items-center gap-3 px-4 py-3 rounded-xl text-sm transition-all ${
                 isActive 

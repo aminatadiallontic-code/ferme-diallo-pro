@@ -17,9 +17,9 @@ const data = [
 ];
 
 const statsCards = [
-  { label: 'Revenu annuel', value: '11.000.000 FCFA', change: '+18%', positive: true },
-  { label: 'Profit net', value: '5.440.000 FCFA', change: '+22%', positive: true },
-  { label: 'Marge moyenne', value: '49%', change: '+5%', positive: true },
+  { label: 'Revenu annuel', value: '11M FCFA', change: '+18%', positive: true },
+  { label: 'Profit net', value: '5.4M FCFA', change: '+22%', positive: true },
+  { label: 'Marge moy.', value: '49%', change: '+5%', positive: true },
   { label: 'Œufs produits', value: '48.500', change: '+8%', positive: true },
 ];
 
@@ -33,11 +33,11 @@ const Rapports = () => {
       <Header title="Rapports" />
 
       {/* Stats Overview */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-8">
         {statsCards.map((stat, index) => (
           <div key={index} className="stat-card">
-            <p className="text-sm text-muted-foreground mb-1">{stat.label}</p>
-            <p className="text-xl font-black tracking-tight text-foreground">
+            <p className="text-xs md:text-sm text-muted-foreground mb-1">{stat.label}</p>
+            <p className="text-lg md:text-xl font-black tracking-tight text-foreground">
               {stat.value}
             </p>
             <span className={stat.positive ? 'badge-success mt-2' : 'badge-danger mt-2'}>
@@ -48,10 +48,10 @@ const Rapports = () => {
       </div>
 
       {/* Main Chart */}
-      <div className="card-xl p-6">
-        <div className="flex items-center justify-between mb-6">
+      <div className="card-xl p-4 md:p-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
           <div>
-            <h2 className="text-xl font-bold text-foreground">
+            <h2 className="text-lg md:text-xl font-bold text-foreground">
               Performance financière
             </h2>
             <p className="text-sm text-muted-foreground">
@@ -61,18 +61,18 @@ const Rapports = () => {
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded-full bg-success" />
-              <span className="text-sm text-muted-foreground">Revenus</span>
+              <span className="text-xs md:text-sm text-muted-foreground">Revenus</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded-full bg-destructive" />
-              <span className="text-sm text-muted-foreground">Dépenses</span>
+              <span className="text-xs md:text-sm text-muted-foreground">Dépenses</span>
             </div>
           </div>
         </div>
 
-        <div className="h-[450px]">
+        <div className="h-[280px] md:h-[450px]">
           <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={data} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+            <AreaChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
               <defs>
                 <linearGradient id="colorRevenus" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor="#10B981" stopOpacity={0.3} />
@@ -88,13 +88,13 @@ const Rapports = () => {
                 dataKey="mois" 
                 axisLine={false}
                 tickLine={false}
-                tick={{ fill: '#64748B', fontSize: 12 }}
+                tick={{ fill: '#64748B', fontSize: 11 }}
               />
               <YAxis 
                 tickFormatter={formatAmount}
                 axisLine={false}
                 tickLine={false}
-                tick={{ fill: '#64748B', fontSize: 12 }}
+                tick={{ fill: '#64748B', fontSize: 11 }}
               />
               <Tooltip
                 contentStyle={{
@@ -108,22 +108,8 @@ const Rapports = () => {
                   new Intl.NumberFormat('fr-FR').format(value) + ' FCFA',
                 ]}
               />
-              <Area
-                type="monotone"
-                dataKey="revenus"
-                stroke="#10B981"
-                strokeWidth={3}
-                fillOpacity={1}
-                fill="url(#colorRevenus)"
-              />
-              <Area
-                type="monotone"
-                dataKey="depenses"
-                stroke="#F43F5E"
-                strokeWidth={3}
-                fillOpacity={1}
-                fill="url(#colorDepenses)"
-              />
+              <Area type="monotone" dataKey="revenus" stroke="#10B981" strokeWidth={3} fillOpacity={1} fill="url(#colorRevenus)" />
+              <Area type="monotone" dataKey="depenses" stroke="#F43F5E" strokeWidth={3} fillOpacity={1} fill="url(#colorDepenses)" />
             </AreaChart>
           </ResponsiveContainer>
         </div>

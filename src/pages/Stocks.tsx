@@ -32,8 +32,8 @@ const categoryIcons = {
 
 const categoryLabels = {
   aliments: 'Aliments',
-  vaccins: 'Vaccins & Médicaments',
-  oeufs: 'Production Œufs',
+  vaccins: 'Vaccins',
+  oeufs: 'Œufs',
 };
 
 const Stocks = () => {
@@ -64,52 +64,52 @@ const Stocks = () => {
       <Header title="Stocks" />
 
       {/* Status Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6 mb-8">
         <div className="stat-card">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="p-3 rounded-2xl bg-success/10">
-              <CheckCircle className="text-success" size={24} />
+          <div className="flex items-center gap-3 mb-3 md:mb-4">
+            <div className="p-2 md:p-3 rounded-2xl bg-success/10">
+              <CheckCircle className="text-success" size={20} />
             </div>
             <div>
-              <p className="text-sm text-muted-foreground">Optimal</p>
-              <p className="text-2xl font-black text-success">{optimalCount}</p>
+              <p className="text-xs md:text-sm text-muted-foreground">Optimal</p>
+              <p className="text-xl md:text-2xl font-black text-success">{optimalCount}</p>
             </div>
           </div>
-          <p className="text-sm text-muted-foreground">Stocks en bon état</p>
+          <p className="text-xs md:text-sm text-muted-foreground">Stocks en bon état</p>
         </div>
 
         <div className="stat-card">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="p-3 rounded-2xl bg-destructive/10">
-              <AlertTriangle className="text-destructive" size={24} />
+          <div className="flex items-center gap-3 mb-3 md:mb-4">
+            <div className="p-2 md:p-3 rounded-2xl bg-destructive/10">
+              <AlertTriangle className="text-destructive" size={20} />
             </div>
             <div>
-              <p className="text-sm text-muted-foreground">Critique</p>
-              <p className="text-2xl font-black text-destructive">{criticalCount}</p>
+              <p className="text-xs md:text-sm text-muted-foreground">Critique</p>
+              <p className="text-xl md:text-2xl font-black text-destructive">{criticalCount}</p>
             </div>
           </div>
-          <p className="text-sm text-muted-foreground">Réapprovisionnement requis</p>
+          <p className="text-xs md:text-sm text-muted-foreground">Réapprovisionnement requis</p>
         </div>
 
         <div className="stat-card">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="p-3 rounded-2xl bg-primary/10">
-              <Package className="text-primary" size={24} />
+          <div className="flex items-center gap-3 mb-3 md:mb-4">
+            <div className="p-2 md:p-3 rounded-2xl bg-primary/10">
+              <Package className="text-primary" size={20} />
             </div>
             <div>
-              <p className="text-sm text-muted-foreground">Total</p>
-              <p className="text-2xl font-black text-foreground">{stocks.length}</p>
+              <p className="text-xs md:text-sm text-muted-foreground">Total</p>
+              <p className="text-xl md:text-2xl font-black text-foreground">{stocks.length}</p>
             </div>
           </div>
-          <p className="text-sm text-muted-foreground">Articles en inventaire</p>
+          <p className="text-xs md:text-sm text-muted-foreground">Articles en inventaire</p>
         </div>
       </div>
 
       {/* Category Filter */}
-      <div className="flex gap-3 mb-6 flex-wrap">
+      <div className="flex gap-2 md:gap-3 mb-6 flex-wrap">
         <Button
           variant={selectedCategory === 'all' ? 'default' : 'outline'}
-          className="rounded-xl btn-press"
+          className="rounded-xl btn-press text-sm"
           onClick={() => setSelectedCategory('all')}
         >
           Tous
@@ -120,7 +120,7 @@ const Stocks = () => {
             <Button
               key={key}
               variant={selectedCategory === key ? 'default' : 'outline'}
-              className="rounded-xl btn-press gap-2"
+              className="rounded-xl btn-press gap-2 text-sm"
               onClick={() => setSelectedCategory(key)}
             >
               <Icon size={16} />
@@ -131,8 +131,8 @@ const Stocks = () => {
       </div>
 
       {/* Stock Items */}
-      <div className="card-xl p-6">
-        <div className="space-y-4">
+      <div className="card-xl p-4 md:p-6">
+        <div className="space-y-3 md:space-y-4">
           {filteredStocks.map((item) => {
             const status = getStatus(item);
             const Icon = categoryIcons[item.category];
@@ -140,25 +140,25 @@ const Stocks = () => {
             return (
               <div
                 key={item.id}
-                className="flex items-center justify-between p-4 rounded-2xl bg-secondary/50 hover:bg-secondary transition-colors"
+                className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-2xl bg-secondary/50 hover:bg-secondary transition-colors"
               >
-                <div className="flex items-center gap-4">
-                  <div className={`p-3 rounded-xl ${
+                <div className="flex items-center gap-3 md:gap-4">
+                  <div className={`p-2 md:p-3 rounded-xl shrink-0 ${
                     status === 'optimal' ? 'bg-success/10 text-success' : 'bg-destructive/10 text-destructive'
                   }`}>
                     <Icon size={20} />
                   </div>
                   <div>
-                    <p className="font-medium text-foreground">{item.name}</p>
-                    <p className="text-sm text-muted-foreground">
-                      Seuil: {item.threshold} {item.unit} • Màj: {new Date(item.lastUpdate).toLocaleDateString('fr-FR')}
+                    <p className="font-medium text-foreground text-sm md:text-base">{item.name}</p>
+                    <p className="text-xs md:text-sm text-muted-foreground">
+                      Seuil: {item.threshold} {item.unit}
                     </p>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-4">
-                  <div className="text-right">
-                    <p className={`font-bold text-lg ${
+                <div className="flex items-center justify-between sm:justify-end gap-3 md:gap-4">
+                  <div className="text-left sm:text-right">
+                    <p className={`font-bold text-base md:text-lg ${
                       status === 'optimal' ? 'text-success' : 'text-destructive'
                     }`}>
                       {item.quantity} {item.unit}
