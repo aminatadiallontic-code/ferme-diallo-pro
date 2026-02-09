@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Package, Pill, Egg, AlertTriangle, CheckCircle, Plus, Minus } from 'lucide-react';
 import Header from '@/components/layout/Header';
 import { Button } from '@/components/ui/button';
-import chickenImg from '@/assets/chicken.png';
+
 
 interface StockItem {
   id: number;
@@ -62,10 +62,7 @@ const Stocks = () => {
 
   return (
     <div className="animate-slide-in">
-      <div className="flex items-center justify-between">
-        <Header title="Stocks" />
-        <img src={chickenImg} alt="Poule" className="w-16 h-16 md:w-20 md:h-20 object-contain" />
-      </div>
+      <Header title="Stocks" />
 
       {/* Status Overview */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6 mb-8">

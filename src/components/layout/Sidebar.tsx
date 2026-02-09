@@ -6,12 +6,12 @@ import {
   BarChart3, 
   Package, 
   LogOut,
-  Home,
   LayoutDashboard,
   UserCheck
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
+import logo from '@/assets/logo.png';
 
 interface SidebarProps {
   isMobile?: boolean;
@@ -49,9 +49,7 @@ const Sidebar = ({ isMobile = false, onNavClick }: SidebarProps) => {
       {/* Logo */}
       <div className="p-5 border-b border-border">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-success flex items-center justify-center">
-            <Home className="text-success-foreground" size={20} />
-          </div>
+          <img src={logo} alt="Ferme Diallo" className="w-10 h-10 rounded-xl object-contain" />
           <div>
             <h1 className="font-bold text-base text-foreground">
               Ferme Diallo
