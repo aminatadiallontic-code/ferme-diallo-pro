@@ -7,6 +7,7 @@ interface UserCredentials {
   password: string;
   name: string;
   role: UserRole;
+  status?: 'actif' | 'inactif';
 }
 
 interface User {
@@ -24,6 +25,10 @@ interface AuthContextType {
   addUser: (userData: UserCredentials) => void;
   getAllUsers: () => UserCredentials[];
   removeUser: (email: string) => void;
+  toggleUserStatus: (email: string) => void;
+  updateProfile: (data: { name?: string; password?: string }) => void;
+  updateLogo: (logoUrl: string) => void;
+  logo: string | null;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -51,7 +56,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return stored ? JSON.parse(stored) : [];
   });
 
-  const allCredentials = [...DEFAULT_USERS, ...extraUsers];
+  const [userStatuses, setUserStatuses] = useState<Record<string, 'actif' | 'inactif'>>(() => {
+    const stored = localStorage.getItem('ferme_diallo_user_statuses');
+    return stored ? JSON.parse(stored) : {};
+  });
+
+  const [logo, setLogo] = useState<string | null>(() => {
+    return localStorage.getItem('ferme_diallo_logo');
+  });
 
   const login = useCallback((email: string, password: string): boolean => {
     const allUsers = [...DEFAULT_USERS, ...(JSON.parse(localStorage.getItem('ferme_diallo_extra_users') || '[]'))];
@@ -84,13 +96,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
-  const getAllUsers = useCallback((): UserCredentials[] => {
-    const stored = JSON.parse(localStorage.getItem('ferme_diallo_extra_users') || '[]');
-    return [...DEFAULT_USERS, ...stored];
-  }, []);
 
   const removeUser = useCallback((email: string) => {
-    // Cannot remove default users
     if (DEFAULT_USERS.some(u => u.email === email)) return;
     setExtraUsers(prev => {
       const updated = prev.filter(u => u.email !== email);
@@ -99,8 +106,53 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
+  const toggleUserStatus = useCallback((email: string) => {
+    setUserStatuses(prev => {
+      const current = prev[email] || 'actif';
+      const updated = { ...prev, [email]: current === 'actif' ? 'inactif' as const : 'actif' as const };
+      localStorage.setItem('ferme_diallo_user_statuses', JSON.stringify(updated));
+      return updated;
+    });
+  }, []);
+
+  const updateProfile = useCallback((data: { name?: string; password?: string }) => {
+    if (!user) return;
+    // Update name
+    if (data.name) {
+      const updatedUser = { ...user, name: data.name };
+      setUser(updatedUser);
+      localStorage.setItem('ferme_diallo_user', JSON.stringify(updatedUser));
+    }
+    // Update password in credentials
+    if (data.password) {
+      const isDefault = DEFAULT_USERS.some(u => u.email === user.email);
+      if (!isDefault) {
+        setExtraUsers(prev => {
+          const updated = prev.map(u => u.email === user.email ? { ...u, ...(data.name ? { name: data.name } : {}), password: data.password! } : u);
+          localStorage.setItem('ferme_diallo_extra_users', JSON.stringify(updated));
+          return updated;
+        });
+      }
+    }
+  }, [user]);
+
+  const updateLogo = useCallback((logoUrl: string) => {
+    setLogo(logoUrl);
+    localStorage.setItem('ferme_diallo_logo', logoUrl);
+  }, []);
+
+  const getUserStatus = useCallback((email: string): 'actif' | 'inactif' => {
+    return userStatuses[email] || 'actif';
+  }, [userStatuses]);
+
+  const getAllUsersWithStatus = useCallback((): UserCredentials[] => {
+    const stored = JSON.parse(localStorage.getItem('ferme_diallo_extra_users') || '[]');
+    const statuses = JSON.parse(localStorage.getItem('ferme_diallo_user_statuses') || '{}');
+    return [...DEFAULT_USERS, ...stored].map(u => ({ ...u, status: statuses[u.email] || 'actif' }));
+  }, [userStatuses]);
+
   return (
-    <AuthContext.Provider value={{ user, isAuthenticated: !!user, login, logout, hasAccess, addUser, getAllUsers, removeUser }}>
+    <AuthContext.Provider value={{ user, isAuthenticated: !!user, login, logout, hasAccess, addUser, getAllUsers: getAllUsersWithStatus, removeUser, toggleUserStatus, updateProfile, updateLogo, logo }}>
       {children}
     </AuthContext.Provider>
   );

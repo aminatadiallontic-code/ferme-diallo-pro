@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
-import { Search, Users, TrendingUp, Home, Activity, Edit, Trash2 } from 'lucide-react';
+import { Search, Users, TrendingUp, Home, Activity, Trash2 } from 'lucide-react';
 import { Navigate } from 'react-router-dom';
 import Header from '@/components/layout/Header';
 import AddUserDialog from '@/components/users/AddUserDialog';
 import { useAuth } from '@/contexts/AuthContext';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { Switch } from '@/components/ui/switch';
 import {
   Table,
   TableBody,
@@ -45,7 +46,7 @@ const statusColors: Record<string, string> = {
 };
 
 const GestionUtilisateurs = () => {
-  const { hasAccess, getAllUsers, removeUser } = useAuth();
+  const { hasAccess, getAllUsers, removeUser, toggleUserStatus } = useAuth();
   const [users, setUsers] = useState<User[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [deleteTarget, setDeleteTarget] = useState<User | null>(null);
@@ -57,7 +58,7 @@ const GestionUtilisateurs = () => {
       name: u.name,
       email: u.email,
       role: u.role === 'fermier' ? 'Administrateur' : 'Gestionnaire',
-      status: 'Actif' as const,
+      status: (u.status === 'inactif' ? 'Inactif' : 'Actif') as 'Actif' | 'Inactif',
       lastActivity: new Date().toISOString().split('T')[0],
     }));
     setUsers(mapped);
@@ -183,9 +184,18 @@ const GestionUtilisateurs = () => {
                     </span>
                   </TableCell>
                   <TableCell className="hidden sm:table-cell">
-                    <span className={`inline-flex px-3 py-1 rounded-full text-xs font-medium ${statusColors[user.status]}`}>
-                      {user.status}
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <Switch
+                        checked={user.status === 'Actif'}
+                        onCheckedChange={() => {
+                          toggleUserStatus(user.email);
+                          loadUsers();
+                        }}
+                      />
+                      <span className={`inline-flex px-3 py-1 rounded-full text-xs font-medium ${statusColors[user.status]}`}>
+                        {user.status}
+                      </span>
+                    </div>
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center justify-end gap-1 md:gap-2">
