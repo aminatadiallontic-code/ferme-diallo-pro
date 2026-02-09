@@ -11,7 +11,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
-import logo from '@/assets/logo.png';
+import logoDefault from '@/assets/logo.png';
 
 interface SidebarProps {
   isMobile?: boolean;
@@ -19,7 +19,7 @@ interface SidebarProps {
 }
 
 const Sidebar = ({ isMobile = false, onNavClick }: SidebarProps) => {
-  const { logout, user, hasAccess } = useAuth();
+  const { logout, user, hasAccess, logo: logoCustom } = useAuth();
   const navigate = useNavigate();
 
   const allNavItems = [
@@ -49,7 +49,7 @@ const Sidebar = ({ isMobile = false, onNavClick }: SidebarProps) => {
       {/* Logo */}
       <div className="p-5 border-b border-border">
         <div className="flex items-center gap-3">
-          <img src={logo} alt="Ferme Diallo" className="w-10 h-10 rounded-xl object-contain" />
+          <img src={user?.role === 'fermier' && logoCustom ? logoCustom : logoDefault} alt="Ferme Diallo" className="w-10 h-10 rounded-xl object-contain" />
           <div>
             <h1 className="font-bold text-base text-foreground">
               Ferme Diallo
