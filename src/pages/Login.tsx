@@ -5,6 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import logo from '@/assets/logo.png';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -46,6 +47,7 @@ const Login = () => {
     <div className="min-h-screen flex flex-col items-center justify-center bg-success/5 p-4">
       {/* Header */}
       <div className="text-center mb-8">
+        <img src={logo} alt="Ferme Diallo" className="w-20 h-20 mx-auto mb-3 object-contain" />
         <h1 className="text-4xl font-bold text-success">
           Ferme Diallo
         </h1>
