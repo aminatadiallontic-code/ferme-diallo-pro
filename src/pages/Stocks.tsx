@@ -1,17 +1,13 @@
 import { useState } from 'react';
 import { Package, Pill, Egg, AlertTriangle, CheckCircle, Plus, Minus } from 'lucide-react';
 import Header from '@/components/layout/Header';
+import ExportBar from '@/components/ExportBar';
 import { Button } from '@/components/ui/button';
-
+import { exportToCSV, printSection } from '@/lib/exportUtils';
 
 interface StockItem {
-  id: number;
-  name: string;
-  category: 'aliments' | 'vaccins' | 'oeufs';
-  quantity: number;
-  unit: string;
-  threshold: number;
-  lastUpdate: string;
+  id: number; name: string; category: 'aliments' | 'vaccins' | 'oeufs';
+  quantity: number; unit: string; threshold: number; lastUpdate: string;
 }
 
 const initialStocks: StockItem[] = [
@@ -25,82 +21,72 @@ const initialStocks: StockItem[] = [
   { id: 8, name: 'Œufs calibrés gros', category: 'oeufs', quantity: 85, unit: 'plateaux', threshold: 50, lastUpdate: '2024-01-28' },
 ];
 
-const categoryIcons = {
-  aliments: Package,
-  vaccins: Pill,
-  oeufs: Egg,
-};
-
-const categoryLabels = {
-  aliments: 'Aliments',
-  vaccins: 'Vaccins',
-  oeufs: 'Œufs',
-};
+const categoryIcons = { aliments: Package, vaccins: Pill, oeufs: Egg };
+const categoryLabels = { aliments: 'Aliments', vaccins: 'Vaccins', oeufs: 'Œufs' };
 
 const Stocks = () => {
   const [stocks, setStocks] = useState<StockItem[]>(initialStocks);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
 
-  const getStatus = (item: StockItem) => {
-    return item.quantity >= item.threshold ? 'optimal' : 'critique';
-  };
+  const getStatus = (item: StockItem) => item.quantity >= item.threshold ? 'optimal' : 'critique';
 
-  const filteredStocks = selectedCategory === 'all' 
-    ? stocks 
-    : stocks.filter(s => s.category === selectedCategory);
+  const filteredStocks = selectedCategory === 'all' ? stocks : stocks.filter(s => s.category === selectedCategory);
 
   const updateQuantity = (id: number, delta: number) => {
-    setStocks(stocks.map(s => 
-      s.id === id 
-        ? { ...s, quantity: Math.max(0, s.quantity + delta), lastUpdate: new Date().toISOString().split('T')[0] }
-        : s
-    ));
+    setStocks(stocks.map(s => s.id === id ? { ...s, quantity: Math.max(0, s.quantity + delta), lastUpdate: new Date().toISOString().split('T')[0] } : s));
   };
 
   const criticalCount = stocks.filter(s => getStatus(s) === 'critique').length;
   const optimalCount = stocks.filter(s => getStatus(s) === 'optimal').length;
 
+  const handleExportCSV = () => {
+    exportToCSV(stocks.map(s => ({
+      Nom: s.name, Catégorie: categoryLabels[s.category], Quantité: s.quantity,
+      Unité: s.unit, Seuil: s.threshold, Statut: getStatus(s) === 'optimal' ? 'Optimal' : 'Critique',
+      'Dernière MAJ': s.lastUpdate,
+    })), 'stocks');
+  };
+
+  const handlePrint = () => {
+    printSection('Inventaire des Stocks', `
+      <div class="stats">
+        <div class="stat-box"><div class="label">Optimal</div><div class="value positive">${optimalCount}</div></div>
+        <div class="stat-box"><div class="label">Critique</div><div class="value negative">${criticalCount}</div></div>
+        <div class="stat-box"><div class="label">Total articles</div><div class="value">${stocks.length}</div></div>
+      </div>
+      <table><thead><tr><th>Article</th><th>Catégorie</th><th>Quantité</th><th>Seuil</th><th>Statut</th><th>Dernière MAJ</th></tr></thead><tbody>
+        ${stocks.map(s => `<tr><td>${s.name}</td><td>${categoryLabels[s.category]}</td><td>${s.quantity} ${s.unit}</td><td>${s.threshold} ${s.unit}</td><td class="${getStatus(s) === 'optimal' ? 'positive' : 'negative'}">${getStatus(s) === 'optimal' ? 'Optimal' : 'Critique'}</td><td>${new Date(s.lastUpdate).toLocaleDateString('fr-FR')}</td></tr>`).join('')}
+      </tbody></table>
+    `);
+  };
+
   return (
     <div className="animate-slide-in">
-      <Header title="Stocks" />
+      <div className="flex items-center justify-between gap-3 mb-2">
+        <Header title="Stocks" />
+        <ExportBar onExportCSV={handleExportCSV} onPrint={handlePrint} />
+      </div>
 
       {/* Status Overview */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6 mb-8">
-        <div className="stat-card">
-          <div className="flex items-center gap-3 mb-3 md:mb-4">
-            <div className="p-2 md:p-3 rounded-2xl bg-success/10">
-              <CheckCircle className="text-success" size={20} />
-            </div>
-            <div>
-              <p className="text-xs md:text-sm text-muted-foreground">Optimal</p>
-              <p className="text-xl md:text-2xl font-black text-success">{optimalCount}</p>
-            </div>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4 mb-8">
+        <div className="stat-card hover:shadow-lg hover:-translate-y-0.5 transition-all">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="p-3 rounded-2xl bg-success/10"><CheckCircle className="text-success" size={20} /></div>
+            <div><p className="text-xs md:text-sm text-muted-foreground">Optimal</p><p className="text-xl md:text-2xl font-black text-success">{optimalCount}</p></div>
           </div>
           <p className="text-xs md:text-sm text-muted-foreground">Stocks en bon état</p>
         </div>
-
-        <div className="stat-card">
-          <div className="flex items-center gap-3 mb-3 md:mb-4">
-            <div className="p-2 md:p-3 rounded-2xl bg-destructive/10">
-              <AlertTriangle className="text-destructive" size={20} />
-            </div>
-            <div>
-              <p className="text-xs md:text-sm text-muted-foreground">Critique</p>
-              <p className="text-xl md:text-2xl font-black text-destructive">{criticalCount}</p>
-            </div>
+        <div className="stat-card hover:shadow-lg hover:-translate-y-0.5 transition-all">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="p-3 rounded-2xl bg-destructive/10"><AlertTriangle className="text-destructive" size={20} /></div>
+            <div><p className="text-xs md:text-sm text-muted-foreground">Critique</p><p className="text-xl md:text-2xl font-black text-destructive">{criticalCount}</p></div>
           </div>
           <p className="text-xs md:text-sm text-muted-foreground">Réapprovisionnement requis</p>
         </div>
-
-        <div className="stat-card">
-          <div className="flex items-center gap-3 mb-3 md:mb-4">
-            <div className="p-2 md:p-3 rounded-2xl bg-primary/10">
-              <Package className="text-primary" size={20} />
-            </div>
-            <div>
-              <p className="text-xs md:text-sm text-muted-foreground">Total</p>
-              <p className="text-xl md:text-2xl font-black text-foreground">{stocks.length}</p>
-            </div>
+        <div className="stat-card hover:shadow-lg hover:-translate-y-0.5 transition-all">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="p-3 rounded-2xl bg-primary/10"><Package className="text-primary" size={20} /></div>
+            <div><p className="text-xs md:text-sm text-muted-foreground">Total</p><p className="text-xl md:text-2xl font-black text-foreground">{stocks.length}</p></div>
           </div>
           <p className="text-xs md:text-sm text-muted-foreground">Articles en inventaire</p>
         </div>
@@ -108,24 +94,12 @@ const Stocks = () => {
 
       {/* Category Filter */}
       <div className="flex gap-2 md:gap-3 mb-6 flex-wrap">
-        <Button
-          variant={selectedCategory === 'all' ? 'default' : 'outline'}
-          className="rounded-xl btn-press text-sm"
-          onClick={() => setSelectedCategory('all')}
-        >
-          Tous
-        </Button>
+        <Button variant={selectedCategory === 'all' ? 'default' : 'outline'} className="rounded-xl btn-press text-sm" onClick={() => setSelectedCategory('all')}>Tous</Button>
         {Object.entries(categoryLabels).map(([key, label]) => {
           const Icon = categoryIcons[key as keyof typeof categoryIcons];
           return (
-            <Button
-              key={key}
-              variant={selectedCategory === key ? 'default' : 'outline'}
-              className="rounded-xl btn-press gap-2 text-sm"
-              onClick={() => setSelectedCategory(key)}
-            >
-              <Icon size={16} />
-              {label}
+            <Button key={key} variant={selectedCategory === key ? 'default' : 'outline'} className="rounded-xl btn-press gap-2 text-sm" onClick={() => setSelectedCategory(key)}>
+              <Icon size={16} />{label}
             </Button>
           );
         })}
@@ -133,59 +107,27 @@ const Stocks = () => {
 
       {/* Stock Items */}
       <div className="card-xl p-4 md:p-6">
-        <div className="space-y-3 md:space-y-4">
+        <div className="space-y-3">
           {filteredStocks.map((item) => {
             const status = getStatus(item);
             const Icon = categoryIcons[item.category];
-            
             return (
-              <div
-                key={item.id}
-                className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-2xl bg-secondary/50 hover:bg-secondary transition-colors"
-              >
+              <div key={item.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-2xl bg-secondary/50 hover:bg-secondary hover:shadow-sm transition-all">
                 <div className="flex items-center gap-3 md:gap-4">
-                  <div className={`p-2 md:p-3 rounded-xl shrink-0 ${
-                    status === 'optimal' ? 'bg-success/10 text-success' : 'bg-destructive/10 text-destructive'
-                  }`}>
-                    <Icon size={20} />
-                  </div>
+                  <div className={`p-3 rounded-xl shrink-0 ${status === 'optimal' ? 'bg-success/10 text-success' : 'bg-destructive/10 text-destructive'}`}><Icon size={20} /></div>
                   <div>
                     <p className="font-medium text-foreground text-sm md:text-base">{item.name}</p>
-                    <p className="text-xs md:text-sm text-muted-foreground">
-                      Seuil: {item.threshold} {item.unit}
-                    </p>
+                    <p className="text-xs md:text-sm text-muted-foreground">Seuil: {item.threshold} {item.unit}</p>
                   </div>
                 </div>
-
                 <div className="flex items-center justify-between sm:justify-end gap-3 md:gap-4">
                   <div className="text-left sm:text-right">
-                    <p className={`font-bold text-base md:text-lg ${
-                      status === 'optimal' ? 'text-success' : 'text-destructive'
-                    }`}>
-                      {item.quantity} {item.unit}
-                    </p>
-                    <span className={status === 'optimal' ? 'badge-success' : 'badge-danger'}>
-                      {status === 'optimal' ? 'Optimal' : 'Critique'}
-                    </span>
+                    <p className={`font-bold text-base md:text-lg ${status === 'optimal' ? 'text-success' : 'text-destructive'}`}>{item.quantity} {item.unit}</p>
+                    <span className={status === 'optimal' ? 'badge-success' : 'badge-danger'}>{status === 'optimal' ? 'Optimal' : 'Critique'}</span>
                   </div>
-
                   <div className="flex items-center gap-2">
-                    <Button
-                      size="icon"
-                      variant="outline"
-                      className="h-8 w-8 rounded-lg btn-press"
-                      onClick={() => updateQuantity(item.id, -10)}
-                    >
-                      <Minus size={14} />
-                    </Button>
-                    <Button
-                      size="icon"
-                      variant="outline"
-                      className="h-8 w-8 rounded-lg btn-press"
-                      onClick={() => updateQuantity(item.id, 10)}
-                    >
-                      <Plus size={14} />
-                    </Button>
+                    <Button size="icon" variant="outline" className="h-8 w-8 rounded-lg btn-press" onClick={() => updateQuantity(item.id, -10)}><Minus size={14} /></Button>
+                    <Button size="icon" variant="outline" className="h-8 w-8 rounded-lg btn-press" onClick={() => updateQuantity(item.id, 10)}><Plus size={14} /></Button>
                   </div>
                 </div>
               </div>
