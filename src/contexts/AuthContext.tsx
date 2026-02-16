@@ -16,6 +16,12 @@ interface User {
   role: UserRole;
 }
 
+export interface PasswordResetRequest {
+  email: string;
+  requestedAt: string;
+  status: 'pending' | 'approved' | 'rejected';
+}
+
 interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
@@ -29,19 +35,21 @@ interface AuthContextType {
   updateProfile: (data: { name?: string; password?: string }) => void;
   updateLogo: (logoUrl: string) => void;
   logo: string | null;
+  requestPasswordReset: (email: string) => boolean;
+  getResetRequests: () => PasswordResetRequest[];
+  approveResetRequest: (email: string) => string;
+  rejectResetRequest: (email: string) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Default credentials
 const DEFAULT_USERS: UserCredentials[] = [
   { email: 'admin@gmail.com', password: 'Di@llo2026', name: 'Mamadou Diallo', role: 'fermier' },
   { email: 'gestionnaire@gmail.com', password: 'Gest@2026', name: 'Ibrahima Sow', role: 'gestionnaire' },
 ];
 
-// Gestionnaire: restricted from dashboard, utilisateurs, finance, parametres
 const ROLE_RESTRICTIONS: Record<UserRole, string[]> = {
-  fermier: [], // Full access
+  fermier: [],
   gestionnaire: ['finance', 'dashboard', 'utilisateurs', 'parametres'],
 };
 
@@ -65,10 +73,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return localStorage.getItem('ferme_diallo_logo');
   });
 
+  const [resetRequests, setResetRequests] = useState<PasswordResetRequest[]>(() => {
+    const stored = localStorage.getItem('ferme_diallo_reset_requests');
+    return stored ? JSON.parse(stored) : [];
+  });
+
   const login = useCallback((email: string, password: string): boolean => {
     const allUsers = [...DEFAULT_USERS, ...(JSON.parse(localStorage.getItem('ferme_diallo_extra_users') || '[]'))];
     const found = allUsers.find((u: UserCredentials) => u.email === email && u.password === password);
     if (found) {
+      // Check if user is inactive
+      const statuses = JSON.parse(localStorage.getItem('ferme_diallo_user_statuses') || '{}');
+      if (statuses[found.email] === 'inactif') return false;
+      
       const userData: User = { email: found.email, name: found.name, role: found.role };
       setUser(userData);
       localStorage.setItem('ferme_diallo_user', JSON.stringify(userData));
@@ -96,7 +113,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
-
   const removeUser = useCallback((email: string) => {
     if (DEFAULT_USERS.some(u => u.email === email)) return;
     setExtraUsers(prev => {
@@ -117,13 +133,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const updateProfile = useCallback((data: { name?: string; password?: string }) => {
     if (!user) return;
-    // Update name
     if (data.name) {
       const updatedUser = { ...user, name: data.name };
       setUser(updatedUser);
       localStorage.setItem('ferme_diallo_user', JSON.stringify(updatedUser));
     }
-    // Update password in credentials
     if (data.password) {
       const isDefault = DEFAULT_USERS.some(u => u.email === user.email);
       if (!isDefault) {
@@ -141,9 +155,56 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.setItem('ferme_diallo_logo', logoUrl);
   }, []);
 
-  const getUserStatus = useCallback((email: string): 'actif' | 'inactif' => {
-    return userStatuses[email] || 'actif';
-  }, [userStatuses]);
+  const requestPasswordReset = useCallback((email: string): boolean => {
+    const allUsers = [...DEFAULT_USERS, ...(JSON.parse(localStorage.getItem('ferme_diallo_extra_users') || '[]'))];
+    const exists = allUsers.some((u: UserCredentials) => u.email === email);
+    if (!exists) return false;
+    
+    setResetRequests(prev => {
+      // Remove any existing pending request for this email
+      const filtered = prev.filter(r => r.email !== email || r.status !== 'pending');
+      const updated = [...filtered, { email, requestedAt: new Date().toISOString(), status: 'pending' as const }];
+      localStorage.setItem('ferme_diallo_reset_requests', JSON.stringify(updated));
+      return updated;
+    });
+    return true;
+  }, []);
+
+  const getResetRequests = useCallback((): PasswordResetRequest[] => {
+    const stored = JSON.parse(localStorage.getItem('ferme_diallo_reset_requests') || '[]');
+    return stored.filter((r: PasswordResetRequest) => r.status === 'pending');
+  }, [resetRequests]);
+
+  const approveResetRequest = useCallback((email: string): string => {
+    const tempPassword = 'Temp@' + Math.random().toString(36).slice(-6);
+    
+    // Update password
+    const isDefault = DEFAULT_USERS.some(u => u.email === email);
+    if (!isDefault) {
+      setExtraUsers(prev => {
+        const updated = prev.map(u => u.email === email ? { ...u, password: tempPassword } : u);
+        localStorage.setItem('ferme_diallo_extra_users', JSON.stringify(updated));
+        return updated;
+      });
+    }
+    
+    // Update request status
+    setResetRequests(prev => {
+      const updated = prev.map(r => r.email === email && r.status === 'pending' ? { ...r, status: 'approved' as const } : r);
+      localStorage.setItem('ferme_diallo_reset_requests', JSON.stringify(updated));
+      return updated;
+    });
+    
+    return tempPassword;
+  }, []);
+
+  const rejectResetRequest = useCallback((email: string) => {
+    setResetRequests(prev => {
+      const updated = prev.map(r => r.email === email && r.status === 'pending' ? { ...r, status: 'rejected' as const } : r);
+      localStorage.setItem('ferme_diallo_reset_requests', JSON.stringify(updated));
+      return updated;
+    });
+  }, []);
 
   const getAllUsersWithStatus = useCallback((): UserCredentials[] => {
     const stored = JSON.parse(localStorage.getItem('ferme_diallo_extra_users') || '[]');
@@ -152,7 +213,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [userStatuses]);
 
   return (
-    <AuthContext.Provider value={{ user, isAuthenticated: !!user, login, logout, hasAccess, addUser, getAllUsers: getAllUsersWithStatus, removeUser, toggleUserStatus, updateProfile, updateLogo, logo }}>
+    <AuthContext.Provider value={{
+      user, isAuthenticated: !!user, login, logout, hasAccess, addUser,
+      getAllUsers: getAllUsersWithStatus, removeUser, toggleUserStatus,
+      updateProfile, updateLogo, logo,
+      requestPasswordReset, getResetRequests, approveResetRequest, rejectResetRequest,
+    }}>
       {children}
     </AuthContext.Provider>
   );
