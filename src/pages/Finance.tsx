@@ -20,18 +20,9 @@ interface Transaction {
   amount: number; date: string; category: string;
 }
 
-const initialTransactions: Transaction[] = [
-  { id: 1, type: 'revenu', description: 'Vente œufs - Marché Dakar', amount: 450000, date: '2024-01-28', category: 'Ventes' },
-  { id: 2, type: 'depense', description: 'Achat aliments volaille', amount: 180000, date: '2024-01-27', category: 'Alimentation' },
-  { id: 3, type: 'revenu', description: 'Vente poulets de chair', amount: 320000, date: '2024-01-26', category: 'Ventes' },
-  { id: 4, type: 'depense', description: 'Vaccins et médicaments', amount: 75000, date: '2024-01-25', category: 'Santé' },
-  { id: 5, type: 'depense', description: 'Salaires employés', amount: 200000, date: '2024-01-24', category: 'Personnel' },
-  { id: 6, type: 'revenu', description: 'Vente poussins', amount: 150000, date: '2024-01-23', category: 'Ventes' },
-];
-
 const Finance = () => {
   const { hasAccess } = useAuth();
-  const [transactions, setTransactions] = useState<Transaction[]>(initialTransactions);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [newTransaction, setNewTransaction] = useState({ type: 'revenu' as 'revenu' | 'depense', description: '', amount: '', category: '' });
 
@@ -85,7 +76,6 @@ const Finance = () => {
         <div className="stat-card hover:shadow-lg hover:-translate-y-0.5 transition-all">
           <div className="flex items-center justify-between mb-4">
             <div className="p-3 rounded-2xl bg-success/10"><TrendingUp className="text-success" size={22} /></div>
-            <span className="badge-success">+12%</span>
           </div>
           <p className="text-xs md:text-sm text-muted-foreground mb-1">Revenus</p>
           <p className="text-xl md:text-2xl font-black tracking-tight text-success">{formatAmount(totalRevenus)}</p>
@@ -93,7 +83,6 @@ const Finance = () => {
         <div className="stat-card hover:shadow-lg hover:-translate-y-0.5 transition-all">
           <div className="flex items-center justify-between mb-4">
             <div className="p-3 rounded-2xl bg-destructive/10"><TrendingDown className="text-destructive" size={22} /></div>
-            <span className="badge-danger">-5%</span>
           </div>
           <p className="text-xs md:text-sm text-muted-foreground mb-1">Dépenses</p>
           <p className="text-xl md:text-2xl font-black tracking-tight text-destructive">{formatAmount(totalDepenses)}</p>
@@ -101,7 +90,6 @@ const Finance = () => {
         <div className="stat-card hover:shadow-lg hover:-translate-y-0.5 transition-all">
           <div className="flex items-center justify-between mb-4">
             <div className="p-3 rounded-2xl bg-primary/10"><Wallet className="text-primary" size={22} /></div>
-            <span className={solde >= 0 ? 'badge-success' : 'badge-danger'}>{solde >= 0 ? 'Positif' : 'Négatif'}</span>
           </div>
           <p className="text-xs md:text-sm text-muted-foreground mb-1">Solde</p>
           <p className={`text-xl md:text-2xl font-black tracking-tight ${solde >= 0 ? 'text-success' : 'text-destructive'}`}>{formatAmount(solde)}</p>
@@ -145,24 +133,28 @@ const Finance = () => {
           </Dialog>
         </div>
 
-        <div className="space-y-3">
-          {transactions.map((t) => (
-            <div key={t.id} className="flex items-center justify-between p-3 md:p-4 rounded-2xl bg-secondary/50 hover:bg-secondary hover:shadow-sm transition-all gap-3">
-              <div className="flex items-center gap-3 md:gap-4 min-w-0">
-                <div className={`p-2 md:p-3 rounded-xl shrink-0 ${t.type === 'revenu' ? 'bg-success/10 text-success' : 'bg-destructive/10 text-destructive'}`}>
-                  {t.type === 'revenu' ? <ArrowUpRight size={18} /> : <ArrowDownRight size={18} />}
+        {transactions.length === 0 ? (
+          <p className="text-sm text-muted-foreground text-center py-12">Aucune transaction enregistrée</p>
+        ) : (
+          <div className="space-y-3">
+            {transactions.map((t) => (
+              <div key={t.id} className="flex items-center justify-between p-3 md:p-4 rounded-2xl bg-secondary/50 hover:bg-secondary hover:shadow-sm transition-all gap-3">
+                <div className="flex items-center gap-3 md:gap-4 min-w-0">
+                  <div className={`p-2 md:p-3 rounded-xl shrink-0 ${t.type === 'revenu' ? 'bg-success/10 text-success' : 'bg-destructive/10 text-destructive'}`}>
+                    {t.type === 'revenu' ? <ArrowUpRight size={18} /> : <ArrowDownRight size={18} />}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="font-medium text-foreground text-sm md:text-base truncate">{t.description}</p>
+                    <p className="text-xs md:text-sm text-muted-foreground">{t.category} • {new Date(t.date).toLocaleDateString('fr-FR')}</p>
+                  </div>
                 </div>
-                <div className="min-w-0">
-                  <p className="font-medium text-foreground text-sm md:text-base truncate">{t.description}</p>
-                  <p className="text-xs md:text-sm text-muted-foreground">{t.category} • {new Date(t.date).toLocaleDateString('fr-FR')}</p>
-                </div>
+                <p className={`font-bold text-sm md:text-base whitespace-nowrap ${t.type === 'revenu' ? 'text-success' : 'text-destructive'}`}>
+                  {t.type === 'revenu' ? '+' : '-'} {formatAmount(t.amount)}
+                </p>
               </div>
-              <p className={`font-bold text-sm md:text-base whitespace-nowrap ${t.type === 'revenu' ? 'text-success' : 'text-destructive'}`}>
-                {t.type === 'revenu' ? '+' : '-'} {formatAmount(t.amount)}
-              </p>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

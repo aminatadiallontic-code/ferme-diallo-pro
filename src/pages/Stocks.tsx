@@ -11,14 +11,14 @@ interface StockItem {
 }
 
 const initialStocks: StockItem[] = [
-  { id: 1, name: 'Aliment croissance', category: 'aliments', quantity: 850, unit: 'kg', threshold: 500, lastUpdate: '2024-01-28' },
-  { id: 2, name: 'Aliment pondeuses', category: 'aliments', quantity: 320, unit: 'kg', threshold: 400, lastUpdate: '2024-01-27' },
-  { id: 3, name: 'Maïs concassé', category: 'aliments', quantity: 1200, unit: 'kg', threshold: 600, lastUpdate: '2024-01-26' },
-  { id: 4, name: 'Vaccin Newcastle', category: 'vaccins', quantity: 45, unit: 'doses', threshold: 50, lastUpdate: '2024-01-25' },
-  { id: 5, name: 'Vaccin Gumboro', category: 'vaccins', quantity: 120, unit: 'doses', threshold: 80, lastUpdate: '2024-01-24' },
-  { id: 6, name: 'Antibiotiques', category: 'vaccins', quantity: 25, unit: 'flacons', threshold: 30, lastUpdate: '2024-01-23' },
-  { id: 7, name: 'Œufs frais (plateau)', category: 'oeufs', quantity: 280, unit: 'plateaux', threshold: 100, lastUpdate: '2024-01-28' },
-  { id: 8, name: 'Œufs calibrés gros', category: 'oeufs', quantity: 85, unit: 'plateaux', threshold: 50, lastUpdate: '2024-01-28' },
+  { id: 1, name: 'Aliment croissance', category: 'aliments', quantity: 0, unit: 'kg', threshold: 500, lastUpdate: '' },
+  { id: 2, name: 'Aliment pondeuses', category: 'aliments', quantity: 0, unit: 'kg', threshold: 400, lastUpdate: '' },
+  { id: 3, name: 'Maïs concassé', category: 'aliments', quantity: 0, unit: 'kg', threshold: 600, lastUpdate: '' },
+  { id: 4, name: 'Vaccin Newcastle', category: 'vaccins', quantity: 0, unit: 'doses', threshold: 50, lastUpdate: '' },
+  { id: 5, name: 'Vaccin Gumboro', category: 'vaccins', quantity: 0, unit: 'doses', threshold: 80, lastUpdate: '' },
+  { id: 6, name: 'Antibiotiques', category: 'vaccins', quantity: 0, unit: 'flacons', threshold: 30, lastUpdate: '' },
+  { id: 7, name: 'Œufs frais (plateau)', category: 'oeufs', quantity: 0, unit: 'plateaux', threshold: 100, lastUpdate: '' },
+  { id: 8, name: 'Œufs calibrés gros', category: 'oeufs', quantity: 0, unit: 'plateaux', threshold: 50, lastUpdate: '' },
 ];
 
 const categoryIcons = { aliments: Package, vaccins: Pill, oeufs: Egg };
@@ -43,7 +43,7 @@ const Stocks = () => {
     exportToCSV(stocks.map(s => ({
       Nom: s.name, Catégorie: categoryLabels[s.category], Quantité: s.quantity,
       Unité: s.unit, Seuil: s.threshold, Statut: getStatus(s) === 'optimal' ? 'Optimal' : 'Critique',
-      'Dernière MAJ': s.lastUpdate,
+      'Dernière MAJ': s.lastUpdate || '-',
     })), 'stocks');
   };
 
@@ -55,7 +55,7 @@ const Stocks = () => {
         <div class="stat-box"><div class="label">Total articles</div><div class="value">${stocks.length}</div></div>
       </div>
       <table><thead><tr><th>Article</th><th>Catégorie</th><th>Quantité</th><th>Seuil</th><th>Statut</th><th>Dernière MAJ</th></tr></thead><tbody>
-        ${stocks.map(s => `<tr><td>${s.name}</td><td>${categoryLabels[s.category]}</td><td>${s.quantity} ${s.unit}</td><td>${s.threshold} ${s.unit}</td><td class="${getStatus(s) === 'optimal' ? 'positive' : 'negative'}">${getStatus(s) === 'optimal' ? 'Optimal' : 'Critique'}</td><td>${new Date(s.lastUpdate).toLocaleDateString('fr-FR')}</td></tr>`).join('')}
+        ${stocks.map(s => `<tr><td>${s.name}</td><td>${categoryLabels[s.category]}</td><td>${s.quantity} ${s.unit}</td><td>${s.threshold} ${s.unit}</td><td class="${getStatus(s) === 'optimal' ? 'positive' : 'negative'}">${getStatus(s) === 'optimal' ? 'Optimal' : 'Critique'}</td><td>${s.lastUpdate ? new Date(s.lastUpdate).toLocaleDateString('fr-FR') : '-'}</td></tr>`).join('')}
       </tbody></table>
     `);
   };
