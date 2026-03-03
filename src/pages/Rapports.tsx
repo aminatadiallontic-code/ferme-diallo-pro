@@ -4,25 +4,25 @@ import { exportToCSV, printSection } from '@/lib/exportUtils';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 const data = [
-  { mois: 'Jan', revenus: 650000, depenses: 400000 },
-  { mois: 'Fév', revenus: 720000, depenses: 380000 },
-  { mois: 'Mar', revenus: 580000, depenses: 420000 },
-  { mois: 'Avr', revenus: 890000, depenses: 450000 },
-  { mois: 'Mai', revenus: 940000, depenses: 520000 },
-  { mois: 'Juin', revenus: 1020000, depenses: 480000 },
-  { mois: 'Juil', revenus: 870000, depenses: 390000 },
-  { mois: 'Août', revenus: 980000, depenses: 440000 },
-  { mois: 'Sep', revenus: 1150000, depenses: 510000 },
-  { mois: 'Oct', revenus: 1080000, depenses: 470000 },
-  { mois: 'Nov', revenus: 920000, depenses: 420000 },
-  { mois: 'Déc', revenus: 1200000, depenses: 550000 },
+  { mois: 'Jan', revenus: 0, depenses: 0 },
+  { mois: 'Fév', revenus: 0, depenses: 0 },
+  { mois: 'Mar', revenus: 0, depenses: 0 },
+  { mois: 'Avr', revenus: 0, depenses: 0 },
+  { mois: 'Mai', revenus: 0, depenses: 0 },
+  { mois: 'Juin', revenus: 0, depenses: 0 },
+  { mois: 'Juil', revenus: 0, depenses: 0 },
+  { mois: 'Août', revenus: 0, depenses: 0 },
+  { mois: 'Sep', revenus: 0, depenses: 0 },
+  { mois: 'Oct', revenus: 0, depenses: 0 },
+  { mois: 'Nov', revenus: 0, depenses: 0 },
+  { mois: 'Déc', revenus: 0, depenses: 0 },
 ];
 
 const statsCards = [
-  { label: 'Revenu annuel', value: '11M FCFA', change: '+18%', positive: true },
-  { label: 'Profit net', value: '5.4M FCFA', change: '+22%', positive: true },
-  { label: 'Marge moy.', value: '49%', change: '+5%', positive: true },
-  { label: 'Œufs produits', value: '48.500', change: '+8%', positive: true },
+  { label: 'Revenu annuel', value: '0 FCFA', change: '0%', positive: true },
+  { label: 'Profit net', value: '0 FCFA', change: '0%', positive: true },
+  { label: 'Marge moy.', value: '0%', change: '0%', positive: true },
+  { label: 'Œufs produits', value: '0', change: '0%', positive: true },
 ];
 
 const Rapports = () => {

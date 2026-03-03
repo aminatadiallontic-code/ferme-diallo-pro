@@ -10,36 +10,27 @@ import { exportToCSV, printSection } from '@/lib/exportUtils';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 
 const revenueData = [
-  { mois: 'Jan', revenus: 650000, depenses: 400000 },
-  { mois: 'Fév', revenus: 720000, depenses: 380000 },
-  { mois: 'Mar', revenus: 580000, depenses: 420000 },
-  { mois: 'Avr', revenus: 890000, depenses: 450000 },
-  { mois: 'Mai', revenus: 940000, depenses: 520000 },
-  { mois: 'Juin', revenus: 1020000, depenses: 480000 },
+  { mois: 'Jan', revenus: 0, depenses: 0 },
+  { mois: 'Fév', revenus: 0, depenses: 0 },
+  { mois: 'Mar', revenus: 0, depenses: 0 },
+  { mois: 'Avr', revenus: 0, depenses: 0 },
+  { mois: 'Mai', revenus: 0, depenses: 0 },
+  { mois: 'Juin', revenus: 0, depenses: 0 },
 ];
 
 const productionData = [
-  { jour: 'Lun', oeufs: 420 },
-  { jour: 'Mar', oeufs: 380 },
-  { jour: 'Mer', oeufs: 450 },
-  { jour: 'Jeu', oeufs: 390 },
-  { jour: 'Ven', oeufs: 470 },
-  { jour: 'Sam', oeufs: 430 },
-  { jour: 'Dim', oeufs: 350 },
+  { jour: 'Lun', oeufs: 0 },
+  { jour: 'Mar', oeufs: 0 },
+  { jour: 'Mer', oeufs: 0 },
+  { jour: 'Jeu', oeufs: 0 },
+  { jour: 'Ven', oeufs: 0 },
+  { jour: 'Sam', oeufs: 0 },
+  { jour: 'Dim', oeufs: 0 },
 ];
 
-const recentActivities = [
-  { id: 1, text: 'Vente de 500 œufs - Marché Dakar', time: 'Il y a 2h', icon: ShoppingCart, positive: true },
-  { id: 2, text: 'Stock aliments bas - 320kg restants', time: 'Il y a 4h', icon: AlertTriangle, positive: false },
-  { id: 3, text: 'Paiement reçu - 450 000 FCFA', time: 'Il y a 6h', icon: ArrowUpRight, positive: true },
-  { id: 4, text: 'Achat vaccins - 75 000 FCFA', time: 'Hier', icon: ArrowDownRight, positive: false },
-];
+const recentActivities: { id: number; text: string; time: string; icon: any; positive: boolean }[] = [];
 
-const alerts = [
-  { id: 1, level: 'danger', text: '3 lots de vaccins expirent dans 5 jours' },
-  { id: 2, level: 'warning', text: 'Stock d\'aliments pondeuses sous le seuil critique' },
-  { id: 3, level: 'info', text: 'Production d\'œufs en hausse de 12% cette semaine' },
-];
+const alerts: { id: number; level: string; text: string }[] = [];
 
 const Dashboard = () => {
   const { hasAccess } = useAuth();
@@ -51,10 +42,10 @@ const Dashboard = () => {
   const formatAmount = (value: number) => (value / 1000000).toFixed(1) + 'M';
 
   const kpis = [
-    { label: 'Chiffre d\'affaires', value: '4.8M FCFA', change: '+18%', positive: true, icon: TrendingUp, color: 'success' },
-    { label: 'Clients actifs', value: '24', change: '+3', positive: true, icon: Users, color: 'primary' },
-    { label: 'Stocks critiques', value: '3', change: '-1', positive: true, icon: Package, color: 'warning' },
-    { label: 'Œufs produits/sem', value: '2 890', change: '+12%', positive: true, icon: Egg, color: 'accent' },
+    { label: 'Chiffre d\'affaires', value: '0 FCFA', change: '0%', positive: true, icon: TrendingUp, color: 'success' },
+    { label: 'Clients actifs', value: '0', change: '0', positive: true, icon: Users, color: 'primary' },
+    { label: 'Stocks critiques', value: '0', change: '0', positive: true, icon: Package, color: 'warning' },
+    { label: 'Œufs produits/sem', value: '0', change: '0%', positive: true, icon: Egg, color: 'accent' },
   ];
 
   const handleExportCSV = () => {
@@ -150,37 +141,45 @@ const Dashboard = () => {
           <h3 className="text-lg font-bold text-foreground mb-4 flex items-center gap-2">
             <AlertTriangle size={20} className="text-warning" /> Alertes
           </h3>
-          <div className="space-y-3">
-            {alerts.map((alert) => (
-              <div key={alert.id} className={`p-4 rounded-2xl transition-all hover:scale-[1.01] ${
-                alert.level === 'danger' ? 'bg-destructive/10 border border-destructive/20' :
-                alert.level === 'warning' ? 'bg-warning/10 border border-warning/20' :
-                'bg-success/10 border border-success/20'
-              }`}>
-                <p className={`text-sm font-medium ${
-                  alert.level === 'danger' ? 'text-destructive' :
-                  alert.level === 'warning' ? 'text-warning' : 'text-success'
-                }`}>{alert.text}</p>
-              </div>
-            ))}
-          </div>
+          {alerts.length === 0 ? (
+            <p className="text-sm text-muted-foreground text-center py-8">Aucune alerte pour le moment</p>
+          ) : (
+            <div className="space-y-3">
+              {alerts.map((alert) => (
+                <div key={alert.id} className={`p-4 rounded-2xl transition-all hover:scale-[1.01] ${
+                  alert.level === 'danger' ? 'bg-destructive/10 border border-destructive/20' :
+                  alert.level === 'warning' ? 'bg-warning/10 border border-warning/20' :
+                  'bg-success/10 border border-success/20'
+                }`}>
+                  <p className={`text-sm font-medium ${
+                    alert.level === 'danger' ? 'text-destructive' :
+                    alert.level === 'warning' ? 'text-warning' : 'text-success'
+                  }`}>{alert.text}</p>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         <div className="card-xl p-4 md:p-6">
           <h3 className="text-lg font-bold text-foreground mb-4">📋 Activité récente</h3>
-          <div className="space-y-3">
-            {recentActivities.map((activity) => (
-              <div key={activity.id} className="flex items-center gap-4 p-3 rounded-2xl bg-secondary/50 hover:bg-secondary transition-all hover:scale-[1.01]">
-                <div className={`p-2 rounded-xl ${activity.positive ? 'bg-success/10 text-success' : 'bg-destructive/10 text-destructive'}`}>
-                  <activity.icon size={18} />
+          {recentActivities.length === 0 ? (
+            <p className="text-sm text-muted-foreground text-center py-8">Aucune activité récente</p>
+          ) : (
+            <div className="space-y-3">
+              {recentActivities.map((activity) => (
+                <div key={activity.id} className="flex items-center gap-4 p-3 rounded-2xl bg-secondary/50 hover:bg-secondary transition-all hover:scale-[1.01]">
+                  <div className={`p-2 rounded-xl ${activity.positive ? 'bg-success/10 text-success' : 'bg-destructive/10 text-destructive'}`}>
+                    <activity.icon size={18} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-foreground truncate">{activity.text}</p>
+                    <p className="text-xs text-muted-foreground">{activity.time}</p>
+                  </div>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-foreground truncate">{activity.text}</p>
-                  <p className="text-xs text-muted-foreground">{activity.time}</p>
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>

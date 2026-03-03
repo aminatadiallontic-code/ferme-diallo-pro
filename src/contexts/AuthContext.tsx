@@ -53,6 +53,12 @@ const ROLE_RESTRICTIONS: Record<UserRole, string[]> = {
   gestionnaire: ['finance', 'dashboard', 'utilisateurs', 'parametres'],
 };
 
+// Helper to get effective password for default users (supports overrides)
+function getDefaultUserPassword(email: string, defaultPassword: string): string {
+  const overrides = JSON.parse(localStorage.getItem('ferme_diallo_password_overrides') || '{}');
+  return overrides[email] || defaultPassword;
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(() => {
     const stored = localStorage.getItem('ferme_diallo_user');
@@ -79,10 +85,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   });
 
   const login = useCallback((email: string, password: string): boolean => {
-    const allUsers = [...DEFAULT_USERS, ...(JSON.parse(localStorage.getItem('ferme_diallo_extra_users') || '[]'))];
+    const extras = JSON.parse(localStorage.getItem('ferme_diallo_extra_users') || '[]');
+    // Build effective user list with password overrides for defaults
+    const allUsers = [
+      ...DEFAULT_USERS.map(u => ({ ...u, password: getDefaultUserPassword(u.email, u.password) })),
+      ...extras,
+    ];
     const found = allUsers.find((u: UserCredentials) => u.email === email && u.password === password);
     if (found) {
-      // Check if user is inactive
       const statuses = JSON.parse(localStorage.getItem('ferme_diallo_user_statuses') || '{}');
       if (statuses[found.email] === 'inactif') return false;
       
@@ -140,7 +150,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
     if (data.password) {
       const isDefault = DEFAULT_USERS.some(u => u.email === user.email);
-      if (!isDefault) {
+      if (isDefault) {
+        // Store password override for default users
+        const overrides = JSON.parse(localStorage.getItem('ferme_diallo_password_overrides') || '{}');
+        overrides[user.email] = data.password;
+        localStorage.setItem('ferme_diallo_password_overrides', JSON.stringify(overrides));
+      } else {
         setExtraUsers(prev => {
           const updated = prev.map(u => u.email === user.email ? { ...u, ...(data.name ? { name: data.name } : {}), password: data.password! } : u);
           localStorage.setItem('ferme_diallo_extra_users', JSON.stringify(updated));
@@ -156,12 +171,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const requestPasswordReset = useCallback((email: string): boolean => {
-    const allUsers = [...DEFAULT_USERS, ...(JSON.parse(localStorage.getItem('ferme_diallo_extra_users') || '[]'))];
+    const extras = JSON.parse(localStorage.getItem('ferme_diallo_extra_users') || '[]');
+    const allUsers = [...DEFAULT_USERS, ...extras];
     const exists = allUsers.some((u: UserCredentials) => u.email === email);
     if (!exists) return false;
     
     setResetRequests(prev => {
-      // Remove any existing pending request for this email
       const filtered = prev.filter(r => r.email !== email || r.status !== 'pending');
       const updated = [...filtered, { email, requestedAt: new Date().toISOString(), status: 'pending' as const }];
       localStorage.setItem('ferme_diallo_reset_requests', JSON.stringify(updated));
@@ -178,9 +193,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const approveResetRequest = useCallback((email: string): string => {
     const tempPassword = 'Temp@' + Math.random().toString(36).slice(-6);
     
-    // Update password
     const isDefault = DEFAULT_USERS.some(u => u.email === email);
-    if (!isDefault) {
+    if (isDefault) {
+      // Store password override for default users
+      const overrides = JSON.parse(localStorage.getItem('ferme_diallo_password_overrides') || '{}');
+      overrides[email] = tempPassword;
+      localStorage.setItem('ferme_diallo_password_overrides', JSON.stringify(overrides));
+    } else {
       setExtraUsers(prev => {
         const updated = prev.map(u => u.email === email ? { ...u, password: tempPassword } : u);
         localStorage.setItem('ferme_diallo_extra_users', JSON.stringify(updated));
@@ -188,7 +207,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
     }
     
-    // Update request status
     setResetRequests(prev => {
       const updated = prev.map(r => r.email === email && r.status === 'pending' ? { ...r, status: 'approved' as const } : r);
       localStorage.setItem('ferme_diallo_reset_requests', JSON.stringify(updated));
