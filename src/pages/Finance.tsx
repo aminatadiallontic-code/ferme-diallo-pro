@@ -31,7 +31,7 @@ const Finance = () => {
   const totalRevenus = transactions.filter(t => t.type === 'revenu').reduce((sum, t) => sum + t.amount, 0);
   const totalDepenses = transactions.filter(t => t.type === 'depense').reduce((sum, t) => sum + t.amount, 0);
   const solde = totalRevenus - totalDepenses;
-  const formatAmount = (amount: number) => new Intl.NumberFormat('fr-FR').format(amount) + ' FCFA';
+  const formatAmount = (amount: number) => new Intl.NumberFormat('fr-FR').format(amount) + ' GNF';
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -115,7 +115,7 @@ const Finance = () => {
                   </Select>
                 </div>
                 <div className="space-y-2"><Label>Description</Label><Input value={newTransaction.description} onChange={(e) => setNewTransaction({ ...newTransaction, description: e.target.value })} placeholder="Description" className="h-12 rounded-xl" required /></div>
-                <div className="space-y-2"><Label>Montant (FCFA)</Label><Input type="number" value={newTransaction.amount} onChange={(e) => setNewTransaction({ ...newTransaction, amount: e.target.value })} placeholder="0" className="h-12 rounded-xl" required /></div>
+                <div className="space-y-2"><Label><div className="space-y-2"><Label>Montant (GNF)</Label><Input type="number" value={newTransaction.amount} onChange={(e) => setNewTransaction({ ...newTransaction, amount: e.target.value })} placeholder="0" className="h-12 rounded-xl" required /></div></Label><Input type="number" value={newTransaction.amount} onChange={(e) => setNewTransaction({ ...newTransaction, amount: e.target.value })} placeholder="0" className="h-12 rounded-xl" required /></div>
                 <div className="space-y-2">
                   <Label>Catégorie</Label>
                   <Select value={newTransaction.category} onValueChange={(v) => setNewTransaction({ ...newTransaction, category: v })}>

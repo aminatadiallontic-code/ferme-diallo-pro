@@ -55,7 +55,7 @@ const Clients = () => {
     c.phone.includes(search)
   );
 
-  const formatAmount = (amount: number) => new Intl.NumberFormat('fr-FR').format(amount) + ' FCFA';
+  const formatAmount = (amount: number) => new Intl.NumberFormat('fr-FR').format(amount) + ' GNF';
 
   const handleExportCSV = () => {
     exportToCSV(clients.map(c => ({
@@ -140,7 +140,7 @@ const Clients = () => {
         </div>
         <div className="stat-card hover:shadow-lg hover:-translate-y-0.5 transition-all">
           <p className="text-xs md:text-sm text-muted-foreground mb-1">Moy. / client</p>
-          <p className="text-lg md:text-2xl font-black text-foreground">{clients.length > 0 ? formatAmount(Math.round(clients.reduce((sum, c) => sum + c.totalSpent, 0) / clients.length)) : '0 FCFA'}</p>
+          <p className="text-lg md:text-2xl font-black text-foreground">{clients.length > 0 ? formatAmount(Math.round(clients.reduce((sum, c) => sum + c.totalSpent, 0) / clients.length)) : <p className="text-lg md:text-2xl font-black text-foreground">{clients.length > 0 ? formatAmount(Math.round(clients.reduce((sum, c) => sum + c.totalSpent, 0) / clients.length)) : '0 GNF'}</p>}</p>
         </div>
       </div>
 
