@@ -19,15 +19,15 @@ const data = [
 ];
 
 const statsCards = [
-  { label: 'Revenu annuel', value: '0 FCFA', change: '0%', positive: true },
-  { label: 'Profit net', value: '0 FCFA', change: '0%', positive: true },
+  { label: 'Revenu annuel', value: '0 GNF', change: '0%', positive: true },
+  { label: 'Profit net', value: '0 GNF', change: '0%', positive: true },
   { label: 'Marge moy.', value: '0%', change: '0%', positive: true },
   { label: 'Œufs produits', value: '0', change: '0%', positive: true },
 ];
 
 const Rapports = () => {
   const formatAmount = (value: number) => (value / 1000000).toFixed(1) + 'M';
-  const formatFull = (amount: number) => new Intl.NumberFormat('fr-FR').format(amount) + ' FCFA';
+  const formatFull = (amount: number) => new Intl.NumberFormat('fr-FR').format(amount) + ' GNF';
 
   const handleExportCSV = () => {
     exportToCSV(data.map(d => ({

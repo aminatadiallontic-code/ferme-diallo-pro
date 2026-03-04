@@ -42,7 +42,7 @@ const Dashboard = () => {
   const formatAmount = (value: number) => (value / 1000000).toFixed(1) + 'M';
 
   const kpis = [
-    { label: 'Chiffre d\'affaires', value: '0 FCFA', change: '0%', positive: true, icon: TrendingUp, color: 'success' },
+    { label: 'Chiffre d\'affaires', value: '0 GNF', change: '0%', positive: true, icon: TrendingUp, color: 'success' },
     { label: 'Clients actifs', value: '0', change: '0', positive: true, icon: Users, color: 'primary' },
     { label: 'Stocks critiques', value: '0', change: '0', positive: true, icon: Package, color: 'warning' },
     { label: 'Œufs produits/sem', value: '0', change: '0%', positive: true, icon: Egg, color: 'accent' },
@@ -60,7 +60,7 @@ const Dashboard = () => {
         ${kpis.map(k => `<div class="stat-box"><div class="label">${k.label}</div><div class="value ${k.positive ? 'positive' : 'negative'}">${k.value}</div></div>`).join('')}
       </div>
       <table><thead><tr><th>Mois</th><th>Revenus</th><th>Dépenses</th><th>Profit</th></tr></thead><tbody>
-        ${revenueData.map(d => `<tr><td>${d.mois}</td><td class="positive">${new Intl.NumberFormat('fr-FR').format(d.revenus)} FCFA</td><td class="negative">${new Intl.NumberFormat('fr-FR').format(d.depenses)} FCFA</td><td class="positive">${new Intl.NumberFormat('fr-FR').format(d.revenus - d.depenses)} FCFA</td></tr>`).join('')}
+        ${revenueData.map(d => `<tr><td>${d.mois}</td><td class="positive">${revenueData.map(d => `<tr><td>${d.mois}</td><td class="positive">${new Intl.NumberFormat('fr-FR').format(d.revenus)} GNF</td><td class="negative">${new Intl.NumberFormat('fr-FR').format(d.depenses)} GNF</td><td class="positive">${new Intl.NumberFormat('fr-FR').format(d.revenus - d.depenses)} GNF</td></tr>`).join('')}</td></tr>`).join('')}
       </tbody></table>
     `;
     printSection('Dashboard - Ferme Diallo', statsHtml);
@@ -110,7 +110,7 @@ const Dashboard = () => {
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(214, 32%, 91%)" />
                 <XAxis dataKey="mois" axisLine={false} tickLine={false} tick={{ fill: 'hsl(215, 16%, 47%)', fontSize: 12 }} />
                 <YAxis tickFormatter={formatAmount} axisLine={false} tickLine={false} tick={{ fill: 'hsl(215, 16%, 47%)', fontSize: 12 }} />
-                <Tooltip contentStyle={{ backgroundColor: 'hsl(0, 0%, 100%)', border: 'none', borderRadius: '16px', boxShadow: '0 10px 40px rgba(0,0,0,0.1)', padding: '12px 16px' }} formatter={(value: number) => [new Intl.NumberFormat('fr-FR').format(value) + ' FCFA']} />
+                <Tooltip contentStyle={{ backgroundColor: 'hsl(0, 0%, 100%)', border: 'none', borderRadius: '16px', boxShadow: '0 10px 40px rgba(0,0,0,0.1)', padding: '12px 16px' }} formatter={(value: number) => [new Intl.NumberFormat('fr-FR').format(value) + ' GNF']} />
                 <Area type="monotone" dataKey="revenus" stroke="hsl(160, 84%, 39%)" strokeWidth={2.5} fillOpacity={1} fill="url(#gradRevenu)" />
                 <Area type="monotone" dataKey="depenses" stroke="hsl(350, 89%, 60%)" strokeWidth={2.5} fillOpacity={1} fill="url(#gradDepense)" />
               </AreaChart>
