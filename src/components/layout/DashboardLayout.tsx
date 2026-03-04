@@ -15,20 +15,20 @@ const DashboardContent = () => {
   }
 
   return (
-    <div className="min-h-screen bg-muted/30 flex">
+    <div className="min-h-screen bg-background flex">
       {/* Desktop Sidebar */}
       {!isMobile && <Sidebar />}
 
-      {/* Mobile Sidebar (Sheet) */}
+      {/* Mobile Sidebar */}
       {isMobile && (
         <Sheet open={isOpen} onOpenChange={(open) => !open && close()}>
-          <SheetContent side="left" className="p-0 w-72">
+          <SheetContent side="left" className="p-0 w-[260px] border-0">
             <Sidebar isMobile onNavClick={close} />
           </SheetContent>
         </Sheet>
       )}
 
-      <main className={`flex-1 ${isMobile ? 'p-4' : 'ml-72 p-8'} animate-fade-in`}>
+      <main className={`flex-1 ${isMobile ? 'px-4 py-4' : 'ml-[260px] px-8 py-6'} animate-fade-in max-w-[1400px]`}>
         <Outlet />
       </main>
     </div>

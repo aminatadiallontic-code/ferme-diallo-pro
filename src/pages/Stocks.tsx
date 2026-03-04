@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Package, Pill, Egg, AlertTriangle, CheckCircle, Plus, Minus } from 'lucide-react';
+import { Package, Pill, Egg, AlertTriangle, CheckCircle, Plus, Minus, Archive } from 'lucide-react';
 import Header from '@/components/layout/Header';
 import ExportBar from '@/components/ExportBar';
 import { Button } from '@/components/ui/button';
@@ -29,7 +29,6 @@ const Stocks = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
 
   const getStatus = (item: StockItem) => item.quantity >= item.threshold ? 'optimal' : 'critique';
-
   const filteredStocks = selectedCategory === 'all' ? stocks : stocks.filter(s => s.category === selectedCategory);
 
   const updateQuantity = (id: number, delta: number) => {
@@ -54,80 +53,110 @@ const Stocks = () => {
         <div class="stat-box"><div class="label">Critique</div><div class="value negative">${criticalCount}</div></div>
         <div class="stat-box"><div class="label">Total articles</div><div class="value">${stocks.length}</div></div>
       </div>
-      <table><thead><tr><th>Article</th><th>Catégorie</th><th>Quantité</th><th>Seuil</th><th>Statut</th><th>Dernière MAJ</th></tr></thead><tbody>
-        ${stocks.map(s => `<tr><td>${s.name}</td><td>${categoryLabels[s.category]}</td><td>${s.quantity} ${s.unit}</td><td>${s.threshold} ${s.unit}</td><td class="${getStatus(s) === 'optimal' ? 'positive' : 'negative'}">${getStatus(s) === 'optimal' ? 'Optimal' : 'Critique'}</td><td>${s.lastUpdate ? new Date(s.lastUpdate).toLocaleDateString('fr-FR') : '-'}</td></tr>`).join('')}
+      <table><thead><tr><th>Article</th><th>Catégorie</th><th>Quantité</th><th>Seuil</th><th>Statut</th></tr></thead><tbody>
+        ${stocks.map(s => `<tr><td>${s.name}</td><td>${categoryLabels[s.category]}</td><td>${s.quantity} ${s.unit}</td><td>${s.threshold} ${s.unit}</td><td class="${getStatus(s) === 'optimal' ? 'positive' : 'negative'}">${getStatus(s) === 'optimal' ? 'Optimal' : 'Critique'}</td></tr>`).join('')}
       </tbody></table>
     `);
   };
 
   return (
-    <div className="animate-slide-in">
-      <div className="flex items-center justify-between gap-3 mb-2">
+    <div className="animate-slide-in space-y-6">
+      <div className="flex items-center justify-between gap-3">
         <Header title="Stocks" />
         <ExportBar onExportCSV={handleExportCSV} onPrint={handlePrint} />
       </div>
 
       {/* Status Overview */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4 mb-8">
-        <div className="stat-card hover:shadow-lg hover:-translate-y-0.5 transition-all">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4">
+        <div className="stat-card">
           <div className="flex items-center gap-3 mb-3">
-            <div className="p-3 rounded-2xl bg-success/10"><CheckCircle className="text-success" size={20} /></div>
-            <div><p className="text-xs md:text-sm text-muted-foreground">Optimal</p><p className="text-xl md:text-2xl font-black text-success">{optimalCount}</p></div>
+            <div className="p-2.5 rounded-xl bg-success/10"><CheckCircle className="text-success" size={18} /></div>
           </div>
-          <p className="text-xs md:text-sm text-muted-foreground">Stocks en bon état</p>
+          <p className="text-xs text-muted-foreground mb-0.5">Optimal</p>
+          <p className="text-lg md:text-xl font-extrabold text-success">{optimalCount}</p>
         </div>
-        <div className="stat-card hover:shadow-lg hover:-translate-y-0.5 transition-all">
+        <div className="stat-card">
           <div className="flex items-center gap-3 mb-3">
-            <div className="p-3 rounded-2xl bg-destructive/10"><AlertTriangle className="text-destructive" size={20} /></div>
-            <div><p className="text-xs md:text-sm text-muted-foreground">Critique</p><p className="text-xl md:text-2xl font-black text-destructive">{criticalCount}</p></div>
+            <div className="p-2.5 rounded-xl bg-destructive/10"><AlertTriangle className="text-destructive" size={18} /></div>
           </div>
-          <p className="text-xs md:text-sm text-muted-foreground">Réapprovisionnement requis</p>
+          <p className="text-xs text-muted-foreground mb-0.5">Critique</p>
+          <p className="text-lg md:text-xl font-extrabold text-destructive">{criticalCount}</p>
         </div>
-        <div className="stat-card hover:shadow-lg hover:-translate-y-0.5 transition-all">
+        <div className="stat-card">
           <div className="flex items-center gap-3 mb-3">
-            <div className="p-3 rounded-2xl bg-primary/10"><Package className="text-primary" size={20} /></div>
-            <div><p className="text-xs md:text-sm text-muted-foreground">Total</p><p className="text-xl md:text-2xl font-black text-foreground">{stocks.length}</p></div>
+            <div className="p-2.5 rounded-xl bg-primary/10"><Archive className="text-primary" size={18} /></div>
           </div>
-          <p className="text-xs md:text-sm text-muted-foreground">Articles en inventaire</p>
+          <p className="text-xs text-muted-foreground mb-0.5">Total articles</p>
+          <p className="text-lg md:text-xl font-extrabold text-foreground">{stocks.length}</p>
         </div>
       </div>
 
       {/* Category Filter */}
-      <div className="flex gap-2 md:gap-3 mb-6 flex-wrap">
-        <Button variant={selectedCategory === 'all' ? 'default' : 'outline'} className="rounded-xl btn-press text-sm" onClick={() => setSelectedCategory('all')}>Tous</Button>
+      <div className="flex gap-2 flex-wrap">
+        <Button
+          variant={selectedCategory === 'all' ? 'default' : 'outline'}
+          className="rounded-xl btn-press text-xs h-9"
+          onClick={() => setSelectedCategory('all')}
+        >
+          Tous
+        </Button>
         {Object.entries(categoryLabels).map(([key, label]) => {
           const Icon = categoryIcons[key as keyof typeof categoryIcons];
           return (
-            <Button key={key} variant={selectedCategory === key ? 'default' : 'outline'} className="rounded-xl btn-press gap-2 text-sm" onClick={() => setSelectedCategory(key)}>
-              <Icon size={16} />{label}
+            <Button
+              key={key}
+              variant={selectedCategory === key ? 'default' : 'outline'}
+              className="rounded-xl btn-press gap-2 text-xs h-9"
+              onClick={() => setSelectedCategory(key)}
+            >
+              <Icon size={14} />{label}
             </Button>
           );
         })}
       </div>
 
       {/* Stock Items */}
-      <div className="card-xl p-4 md:p-6">
-        <div className="space-y-3">
+      <div className="card-xl p-5 md:p-6">
+        <div className="space-y-2">
           {filteredStocks.map((item) => {
             const status = getStatus(item);
             const Icon = categoryIcons[item.category];
+            const percentage = Math.min(100, Math.round((item.quantity / item.threshold) * 100));
             return (
-              <div key={item.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-2xl bg-secondary/50 hover:bg-secondary hover:shadow-sm transition-all">
-                <div className="flex items-center gap-3 md:gap-4">
-                  <div className={`p-3 rounded-xl shrink-0 ${status === 'optimal' ? 'bg-success/10 text-success' : 'bg-destructive/10 text-destructive'}`}><Icon size={20} /></div>
-                  <div>
-                    <p className="font-medium text-foreground text-sm md:text-base">{item.name}</p>
-                    <p className="text-xs md:text-sm text-muted-foreground">Seuil: {item.threshold} {item.unit}</p>
+              <div key={item.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-xl bg-secondary/40 hover:bg-secondary/70 transition-colors">
+                <div className="flex items-center gap-3 flex-1 min-w-0">
+                  <div className={`p-2.5 rounded-xl shrink-0 ${status === 'optimal' ? 'bg-success/10 text-success' : 'bg-destructive/10 text-destructive'}`}>
+                    <Icon size={18} />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="font-semibold text-foreground text-[13px]">{item.name}</p>
+                    <div className="flex items-center gap-2 mt-1.5">
+                      <div className="flex-1 max-w-[120px] h-1.5 bg-muted rounded-full overflow-hidden">
+                        <div
+                          className={`h-full rounded-full transition-all duration-500 ${status === 'optimal' ? 'bg-success' : 'bg-destructive'}`}
+                          style={{ width: `${percentage}%` }}
+                        />
+                      </div>
+                      <span className="text-[11px] text-muted-foreground">{percentage}%</span>
+                    </div>
                   </div>
                 </div>
-                <div className="flex items-center justify-between sm:justify-end gap-3 md:gap-4">
+                <div className="flex items-center justify-between sm:justify-end gap-3">
                   <div className="text-left sm:text-right">
-                    <p className={`font-bold text-base md:text-lg ${status === 'optimal' ? 'text-success' : 'text-destructive'}`}>{item.quantity} {item.unit}</p>
-                    <span className={status === 'optimal' ? 'badge-success' : 'badge-danger'}>{status === 'optimal' ? 'Optimal' : 'Critique'}</span>
+                    <p className={`font-bold text-sm ${status === 'optimal' ? 'text-success' : 'text-destructive'}`}>
+                      {item.quantity} <span className="text-xs font-normal text-muted-foreground">{item.unit}</span>
+                    </p>
+                    <span className={status === 'optimal' ? 'badge-success' : 'badge-danger'}>
+                      {status === 'optimal' ? 'Optimal' : 'Critique'}
+                    </span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Button size="icon" variant="outline" className="h-8 w-8 rounded-lg btn-press" onClick={() => updateQuantity(item.id, -10)}><Minus size={14} /></Button>
-                    <Button size="icon" variant="outline" className="h-8 w-8 rounded-lg btn-press" onClick={() => updateQuantity(item.id, 10)}><Plus size={14} /></Button>
+                  <div className="flex items-center gap-1.5">
+                    <Button size="icon" variant="outline" className="h-8 w-8 rounded-lg btn-press" onClick={() => updateQuantity(item.id, -10)}>
+                      <Minus size={13} />
+                    </Button>
+                    <Button size="icon" variant="outline" className="h-8 w-8 rounded-lg btn-press" onClick={() => updateQuantity(item.id, 10)}>
+                      <Plus size={13} />
+                    </Button>
                   </div>
                 </div>
               </div>

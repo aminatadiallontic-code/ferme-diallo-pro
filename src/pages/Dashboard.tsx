@@ -1,6 +1,6 @@
 import { 
   TrendingUp, Users, Package, Egg, AlertTriangle,
-  ArrowUpRight, ArrowDownRight, ShoppingCart
+  ArrowUpRight, ArrowDownRight, ShoppingCart, FileText
 } from 'lucide-react';
 import { Navigate } from 'react-router-dom';
 import Header from '@/components/layout/Header';
@@ -29,7 +29,6 @@ const productionData = [
 ];
 
 const recentActivities: { id: number; text: string; time: string; icon: any; positive: boolean }[] = [];
-
 const alerts: { id: number; level: string; text: string }[] = [];
 
 const Dashboard = () => {
@@ -42,7 +41,7 @@ const Dashboard = () => {
   const formatAmount = (value: number) => (value / 1000000).toFixed(1) + 'M';
 
   const kpis = [
-    { label: 'Chiffre d\'affaires', value: '0 GNF', change: '0%', positive: true, icon: TrendingUp, color: 'success' },
+    { label: "Chiffre d'affaires", value: '0 GNF', change: '0%', positive: true, icon: TrendingUp, color: 'success' },
     { label: 'Clients actifs', value: '0', change: '0', positive: true, icon: Users, color: 'primary' },
     { label: 'Stocks critiques', value: '0', change: '0', positive: true, icon: Package, color: 'warning' },
     { label: 'Œufs produits/sem', value: '0', change: '0%', positive: true, icon: Egg, color: 'accent' },
@@ -60,75 +59,90 @@ const Dashboard = () => {
         ${kpis.map(k => `<div class="stat-box"><div class="label">${k.label}</div><div class="value ${k.positive ? 'positive' : 'negative'}">${k.value}</div></div>`).join('')}
       </div>
       <table><thead><tr><th>Mois</th><th>Revenus</th><th>Dépenses</th><th>Profit</th></tr></thead><tbody>
-        ${revenueData.map(d => `<tr><td>${d.mois}</td><td class="positive">${revenueData.map(d => `<tr><td>${d.mois}</td><td class="positive">${new Intl.NumberFormat('fr-FR').format(d.revenus)} GNF</td><td class="negative">${new Intl.NumberFormat('fr-FR').format(d.depenses)} GNF</td><td class="positive">${new Intl.NumberFormat('fr-FR').format(d.revenus - d.depenses)} GNF</td></tr>`).join('')}</td></tr>`).join('')}
+        ${revenueData.map(d => `<tr><td>${d.mois}</td><td class="positive">${new Intl.NumberFormat('fr-FR').format(d.revenus)} GNF</td><td class="negative">${new Intl.NumberFormat('fr-FR').format(d.depenses)} GNF</td><td class="positive">${new Intl.NumberFormat('fr-FR').format(d.revenus - d.depenses)} GNF</td></tr>`).join('')}
       </tbody></table>
     `;
     printSection('Dashboard - Ferme Diallo', statsHtml);
   };
 
+  const colorSuccess = 'hsl(160, 84%, 39%)';
+  const colorDanger = 'hsl(0, 72%, 51%)';
+  const colorMuted = 'hsl(220, 10%, 46%)';
+  const colorGrid = 'hsl(220, 13%, 91%)';
+
   return (
-    <div className="animate-slide-in">
-      <div className="flex items-center justify-between gap-3 mb-2">
+    <div className="animate-slide-in space-y-6">
+      <div className="flex items-center justify-between gap-3">
         <Header title="Dashboard" />
         <ExportBar onExportCSV={handleExportCSV} onPrint={handlePrint} />
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-8">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
         {kpis.map((kpi, index) => (
-          <div key={index} className="stat-card group hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300">
-            <div className="flex items-center justify-between mb-3">
-              <div className={`p-3 rounded-2xl bg-${kpi.color}/10 group-hover:scale-110 transition-transform`}>
-                <kpi.icon className={`text-${kpi.color}`} size={22} />
+          <div key={index} className="stat-card group">
+            <div className="flex items-center justify-between mb-4">
+              <div className={`p-2.5 rounded-xl bg-${kpi.color}/10 group-hover:scale-105 transition-transform duration-300`}>
+                <kpi.icon className={`text-${kpi.color}`} size={20} />
               </div>
               <span className={kpi.positive ? 'badge-success' : 'badge-danger'}>{kpi.change}</span>
             </div>
-            <p className="text-xs md:text-sm text-muted-foreground mb-1">{kpi.label}</p>
-            <p className="text-xl md:text-2xl font-black tracking-tight text-foreground">{kpi.value}</p>
+            <p className="text-xs text-muted-foreground mb-0.5">{kpi.label}</p>
+            <p className="text-lg md:text-xl font-extrabold tracking-tight text-foreground">{kpi.value}</p>
           </div>
         ))}
       </div>
 
-      {/* Charts Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6 mb-6 md:mb-8">
-        <div className="card-xl p-4 md:p-6 hover:shadow-lg transition-shadow">
-          <h3 className="text-lg font-bold text-foreground mb-1">Tendance financière</h3>
-          <p className="text-sm text-muted-foreground mb-4">Revenus vs Dépenses (6 mois)</p>
-          <div className="h-[200px] md:h-[250px]">
+      {/* Charts */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div className="card-xl p-5 md:p-6">
+          <div className="flex items-center justify-between mb-5">
+            <div>
+              <h3 className="text-sm font-bold text-foreground">Tendance financière</h3>
+              <p className="text-xs text-muted-foreground mt-0.5">Revenus vs Dépenses</p>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-1.5"><div className="w-2 h-2 rounded-full bg-success" /><span className="text-[11px] text-muted-foreground">Revenus</span></div>
+              <div className="flex items-center gap-1.5"><div className="w-2 h-2 rounded-full bg-destructive" /><span className="text-[11px] text-muted-foreground">Dépenses</span></div>
+            </div>
+          </div>
+          <div className="h-[200px] md:h-[240px]">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={revenueData}>
                 <defs>
                   <linearGradient id="gradRevenu" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="hsl(160, 84%, 39%)" stopOpacity={0.3} />
-                    <stop offset="95%" stopColor="hsl(160, 84%, 39%)" stopOpacity={0} />
+                    <stop offset="5%" stopColor={colorSuccess} stopOpacity={0.2} />
+                    <stop offset="95%" stopColor={colorSuccess} stopOpacity={0} />
                   </linearGradient>
                   <linearGradient id="gradDepense" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="hsl(350, 89%, 60%)" stopOpacity={0.3} />
-                    <stop offset="95%" stopColor="hsl(350, 89%, 60%)" stopOpacity={0} />
+                    <stop offset="5%" stopColor={colorDanger} stopOpacity={0.2} />
+                    <stop offset="95%" stopColor={colorDanger} stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(214, 32%, 91%)" />
-                <XAxis dataKey="mois" axisLine={false} tickLine={false} tick={{ fill: 'hsl(215, 16%, 47%)', fontSize: 12 }} />
-                <YAxis tickFormatter={formatAmount} axisLine={false} tickLine={false} tick={{ fill: 'hsl(215, 16%, 47%)', fontSize: 12 }} />
-                <Tooltip contentStyle={{ backgroundColor: 'hsl(0, 0%, 100%)', border: 'none', borderRadius: '16px', boxShadow: '0 10px 40px rgba(0,0,0,0.1)', padding: '12px 16px' }} formatter={(value: number) => [new Intl.NumberFormat('fr-FR').format(value) + ' GNF']} />
-                <Area type="monotone" dataKey="revenus" stroke="hsl(160, 84%, 39%)" strokeWidth={2.5} fillOpacity={1} fill="url(#gradRevenu)" />
-                <Area type="monotone" dataKey="depenses" stroke="hsl(350, 89%, 60%)" strokeWidth={2.5} fillOpacity={1} fill="url(#gradDepense)" />
+                <CartesianGrid strokeDasharray="3 3" stroke={colorGrid} />
+                <XAxis dataKey="mois" axisLine={false} tickLine={false} tick={{ fill: colorMuted, fontSize: 11 }} />
+                <YAxis tickFormatter={formatAmount} axisLine={false} tickLine={false} tick={{ fill: colorMuted, fontSize: 11 }} />
+                <Tooltip contentStyle={{ backgroundColor: 'hsl(0, 0%, 100%)', border: 'none', borderRadius: '12px', boxShadow: '0 4px 20px rgba(0,0,0,0.08)', padding: '10px 14px', fontSize: '12px' }} formatter={(value: number) => [new Intl.NumberFormat('fr-FR').format(value) + ' GNF']} />
+                <Area type="monotone" dataKey="revenus" stroke={colorSuccess} strokeWidth={2} fillOpacity={1} fill="url(#gradRevenu)" />
+                <Area type="monotone" dataKey="depenses" stroke={colorDanger} strokeWidth={2} fillOpacity={1} fill="url(#gradDepense)" />
               </AreaChart>
             </ResponsiveContainer>
           </div>
         </div>
 
-        <div className="card-xl p-4 md:p-6 hover:shadow-lg transition-shadow">
-          <h3 className="text-lg font-bold text-foreground mb-1">Production d'œufs</h3>
-          <p className="text-sm text-muted-foreground mb-4">Cette semaine (plateaux)</p>
-          <div className="h-[200px] md:h-[250px]">
+        <div className="card-xl p-5 md:p-6">
+          <div className="mb-5">
+            <h3 className="text-sm font-bold text-foreground">Production d'œufs</h3>
+            <p className="text-xs text-muted-foreground mt-0.5">Cette semaine (plateaux)</p>
+          </div>
+          <div className="h-[200px] md:h-[240px]">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={productionData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(214, 32%, 91%)" />
-                <XAxis dataKey="jour" axisLine={false} tickLine={false} tick={{ fill: 'hsl(215, 16%, 47%)', fontSize: 12 }} />
-                <YAxis axisLine={false} tickLine={false} tick={{ fill: 'hsl(215, 16%, 47%)', fontSize: 12 }} />
-                <Tooltip contentStyle={{ backgroundColor: 'hsl(0, 0%, 100%)', border: 'none', borderRadius: '16px', boxShadow: '0 10px 40px rgba(0,0,0,0.1)', padding: '12px 16px' }} />
-                <Bar dataKey="oeufs" fill="hsl(160, 84%, 39%)" radius={[8, 8, 0, 0]} />
+                <CartesianGrid strokeDasharray="3 3" stroke={colorGrid} />
+                <XAxis dataKey="jour" axisLine={false} tickLine={false} tick={{ fill: colorMuted, fontSize: 11 }} />
+                <YAxis axisLine={false} tickLine={false} tick={{ fill: colorMuted, fontSize: 11 }} />
+                <Tooltip contentStyle={{ backgroundColor: 'hsl(0, 0%, 100%)', border: 'none', borderRadius: '12px', boxShadow: '0 4px 20px rgba(0,0,0,0.08)', padding: '10px 14px', fontSize: '12px' }} />
+                <Bar dataKey="oeufs" fill={colorSuccess} radius={[6, 6, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -136,22 +150,26 @@ const Dashboard = () => {
       </div>
 
       {/* Alerts + Activity */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
-        <div className="card-xl p-4 md:p-6">
-          <h3 className="text-lg font-bold text-foreground mb-4 flex items-center gap-2">
-            <AlertTriangle size={20} className="text-warning" /> Alertes
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div className="card-xl p-5 md:p-6">
+          <h3 className="text-sm font-bold text-foreground mb-4 flex items-center gap-2">
+            <AlertTriangle size={16} className="text-warning" /> Alertes
           </h3>
           {alerts.length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center py-8">Aucune alerte pour le moment</p>
+            <div className="empty-state py-10">
+              <div className="empty-state-icon"><AlertTriangle size={24} /></div>
+              <p className="text-sm font-medium text-muted-foreground">Aucune alerte</p>
+              <p className="text-xs text-muted-foreground mt-1">Tout fonctionne normalement</p>
+            </div>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-2">
               {alerts.map((alert) => (
-                <div key={alert.id} className={`p-4 rounded-2xl transition-all hover:scale-[1.01] ${
-                  alert.level === 'danger' ? 'bg-destructive/10 border border-destructive/20' :
-                  alert.level === 'warning' ? 'bg-warning/10 border border-warning/20' :
-                  'bg-success/10 border border-success/20'
+                <div key={alert.id} className={`p-3 rounded-xl transition-all ${
+                  alert.level === 'danger' ? 'bg-destructive/5 border border-destructive/15' :
+                  alert.level === 'warning' ? 'bg-warning/5 border border-warning/15' :
+                  'bg-success/5 border border-success/15'
                 }`}>
-                  <p className={`text-sm font-medium ${
+                  <p className={`text-xs font-medium ${
                     alert.level === 'danger' ? 'text-destructive' :
                     alert.level === 'warning' ? 'text-warning' : 'text-success'
                   }`}>{alert.text}</p>
@@ -161,20 +179,26 @@ const Dashboard = () => {
           )}
         </div>
 
-        <div className="card-xl p-4 md:p-6">
-          <h3 className="text-lg font-bold text-foreground mb-4">📋 Activité récente</h3>
+        <div className="card-xl p-5 md:p-6">
+          <h3 className="text-sm font-bold text-foreground mb-4 flex items-center gap-2">
+            <FileText size={16} className="text-muted-foreground" /> Activité récente
+          </h3>
           {recentActivities.length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center py-8">Aucune activité récente</p>
+            <div className="empty-state py-10">
+              <div className="empty-state-icon"><FileText size={24} /></div>
+              <p className="text-sm font-medium text-muted-foreground">Aucune activité</p>
+              <p className="text-xs text-muted-foreground mt-1">Les actions récentes apparaîtront ici</p>
+            </div>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-2">
               {recentActivities.map((activity) => (
-                <div key={activity.id} className="flex items-center gap-4 p-3 rounded-2xl bg-secondary/50 hover:bg-secondary transition-all hover:scale-[1.01]">
-                  <div className={`p-2 rounded-xl ${activity.positive ? 'bg-success/10 text-success' : 'bg-destructive/10 text-destructive'}`}>
-                    <activity.icon size={18} />
+                <div key={activity.id} className="flex items-center gap-3 p-3 rounded-xl bg-secondary/60 hover:bg-secondary transition-colors">
+                  <div className={`p-2 rounded-lg ${activity.positive ? 'bg-success/10 text-success' : 'bg-destructive/10 text-destructive'}`}>
+                    <activity.icon size={16} />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-foreground truncate">{activity.text}</p>
-                    <p className="text-xs text-muted-foreground">{activity.time}</p>
+                    <p className="text-xs font-medium text-foreground truncate">{activity.text}</p>
+                    <p className="text-[11px] text-muted-foreground">{activity.time}</p>
                   </div>
                 </div>
               ))}

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { TrendingUp, TrendingDown, Wallet, Plus, ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import { TrendingUp, TrendingDown, Wallet, Plus, ArrowUpRight, ArrowDownRight, Receipt } from 'lucide-react';
 import Header from '@/components/layout/Header';
 import ExportBar from '@/components/ExportBar';
 import { useAuth } from '@/contexts/AuthContext';
@@ -65,61 +65,73 @@ const Finance = () => {
   };
 
   return (
-    <div className="animate-slide-in">
-      <div className="flex items-center justify-between gap-3 mb-2">
+    <div className="animate-slide-in space-y-6">
+      <div className="flex items-center justify-between gap-3">
         <Header title="Finance" />
         <ExportBar onExportCSV={handleExportCSV} onPrint={handlePrint} />
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4 mb-8">
-        <div className="stat-card hover:shadow-lg hover:-translate-y-0.5 transition-all">
-          <div className="flex items-center justify-between mb-4">
-            <div className="p-3 rounded-2xl bg-success/10"><TrendingUp className="text-success" size={22} /></div>
+      {/* Stats */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4">
+        <div className="stat-card">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="p-2.5 rounded-xl bg-success/10"><TrendingUp className="text-success" size={20} /></div>
           </div>
-          <p className="text-xs md:text-sm text-muted-foreground mb-1">Revenus</p>
-          <p className="text-xl md:text-2xl font-black tracking-tight text-success">{formatAmount(totalRevenus)}</p>
+          <p className="text-xs text-muted-foreground mb-0.5">Revenus</p>
+          <p className="text-lg md:text-xl font-extrabold tracking-tight text-success">{formatAmount(totalRevenus)}</p>
         </div>
-        <div className="stat-card hover:shadow-lg hover:-translate-y-0.5 transition-all">
-          <div className="flex items-center justify-between mb-4">
-            <div className="p-3 rounded-2xl bg-destructive/10"><TrendingDown className="text-destructive" size={22} /></div>
+        <div className="stat-card">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="p-2.5 rounded-xl bg-destructive/10"><TrendingDown className="text-destructive" size={20} /></div>
           </div>
-          <p className="text-xs md:text-sm text-muted-foreground mb-1">Dépenses</p>
-          <p className="text-xl md:text-2xl font-black tracking-tight text-destructive">{formatAmount(totalDepenses)}</p>
+          <p className="text-xs text-muted-foreground mb-0.5">Dépenses</p>
+          <p className="text-lg md:text-xl font-extrabold tracking-tight text-destructive">{formatAmount(totalDepenses)}</p>
         </div>
-        <div className="stat-card hover:shadow-lg hover:-translate-y-0.5 transition-all">
-          <div className="flex items-center justify-between mb-4">
-            <div className="p-3 rounded-2xl bg-primary/10"><Wallet className="text-primary" size={22} /></div>
+        <div className="stat-card">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="p-2.5 rounded-xl bg-primary/10"><Wallet className="text-primary" size={20} /></div>
           </div>
-          <p className="text-xs md:text-sm text-muted-foreground mb-1">Solde</p>
-          <p className={`text-xl md:text-2xl font-black tracking-tight ${solde >= 0 ? 'text-success' : 'text-destructive'}`}>{formatAmount(solde)}</p>
+          <p className="text-xs text-muted-foreground mb-0.5">Solde</p>
+          <p className={`text-lg md:text-xl font-extrabold tracking-tight ${solde >= 0 ? 'text-success' : 'text-destructive'}`}>{formatAmount(solde)}</p>
         </div>
       </div>
 
       {/* Transactions */}
-      <div className="card-xl p-4 md:p-6">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-6">
-          <h2 className="text-lg md:text-xl font-bold text-foreground">Historique des transactions</h2>
+      <div className="card-xl p-5 md:p-6">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-5">
+          <h2 className="text-sm font-bold text-foreground">Historique des transactions</h2>
           <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>
-              <Button className="rounded-xl btn-press gap-2"><Plus size={18} /><span className="hidden sm:inline">Nouvelle transaction</span><span className="sm:hidden">Ajouter</span></Button>
+              <Button className="rounded-xl btn-press gap-2 h-9 text-xs">
+                <Plus size={16} />
+                <span className="hidden sm:inline">Nouvelle transaction</span>
+                <span className="sm:hidden">Ajouter</span>
+              </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-md rounded-2xl p-6 md:p-8">
-              <DialogHeader><DialogTitle className="text-xl md:text-2xl font-black tracking-tighter">Ajouter une transaction</DialogTitle></DialogHeader>
-              <form onSubmit={handleSubmit} className="space-y-5 mt-4">
-                <div className="space-y-2">
-                  <Label>Type</Label>
+            <DialogContent className="sm:max-w-md rounded-2xl p-6">
+              <DialogHeader>
+                <DialogTitle className="text-lg font-extrabold tracking-tight">Ajouter une transaction</DialogTitle>
+              </DialogHeader>
+              <form onSubmit={handleSubmit} className="space-y-4 mt-3">
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-medium">Type</Label>
                   <Select value={newTransaction.type} onValueChange={(v: 'revenu' | 'depense') => setNewTransaction({ ...newTransaction, type: v })}>
-                    <SelectTrigger className="h-12 rounded-xl"><SelectValue /></SelectTrigger>
+                    <SelectTrigger className="h-11 rounded-xl"><SelectValue /></SelectTrigger>
                     <SelectContent><SelectItem value="revenu">Revenu</SelectItem><SelectItem value="depense">Dépense</SelectItem></SelectContent>
                   </Select>
                 </div>
-                <div className="space-y-2"><Label>Description</Label><Input value={newTransaction.description} onChange={(e) => setNewTransaction({ ...newTransaction, description: e.target.value })} placeholder="Description" className="h-12 rounded-xl" required /></div>
-                <div className="space-y-2"><Label><div className="space-y-2"><Label>Montant (GNF)</Label><Input type="number" value={newTransaction.amount} onChange={(e) => setNewTransaction({ ...newTransaction, amount: e.target.value })} placeholder="0" className="h-12 rounded-xl" required /></div></Label><Input type="number" value={newTransaction.amount} onChange={(e) => setNewTransaction({ ...newTransaction, amount: e.target.value })} placeholder="0" className="h-12 rounded-xl" required /></div>
-                <div className="space-y-2">
-                  <Label>Catégorie</Label>
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-medium">Description</Label>
+                  <Input value={newTransaction.description} onChange={(e) => setNewTransaction({ ...newTransaction, description: e.target.value })} placeholder="Description" className="h-11 rounded-xl" required />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-medium">Montant (GNF)</Label>
+                  <Input type="number" value={newTransaction.amount} onChange={(e) => setNewTransaction({ ...newTransaction, amount: e.target.value })} placeholder="0" className="h-11 rounded-xl" required />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-medium">Catégorie</Label>
                   <Select value={newTransaction.category} onValueChange={(v) => setNewTransaction({ ...newTransaction, category: v })}>
-                    <SelectTrigger className="h-12 rounded-xl"><SelectValue placeholder="Sélectionner" /></SelectTrigger>
+                    <SelectTrigger className="h-11 rounded-xl"><SelectValue placeholder="Sélectionner" /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="Ventes">Ventes</SelectItem><SelectItem value="Alimentation">Alimentation</SelectItem>
                       <SelectItem value="Santé">Santé</SelectItem><SelectItem value="Personnel">Personnel</SelectItem>
@@ -127,28 +139,32 @@ const Finance = () => {
                     </SelectContent>
                   </Select>
                 </div>
-                <Button type="submit" className="w-full h-12 rounded-xl font-semibold btn-press">Ajouter</Button>
+                <Button type="submit" className="w-full h-11 rounded-xl font-semibold btn-press">Ajouter</Button>
               </form>
             </DialogContent>
           </Dialog>
         </div>
 
         {transactions.length === 0 ? (
-          <p className="text-sm text-muted-foreground text-center py-12">Aucune transaction enregistrée</p>
+          <div className="empty-state">
+            <div className="empty-state-icon"><Receipt size={24} /></div>
+            <p className="text-sm font-medium text-muted-foreground">Aucune transaction</p>
+            <p className="text-xs text-muted-foreground mt-1">Ajoutez votre première transaction</p>
+          </div>
         ) : (
-          <div className="space-y-3">
+          <div className="space-y-2">
             {transactions.map((t) => (
-              <div key={t.id} className="flex items-center justify-between p-3 md:p-4 rounded-2xl bg-secondary/50 hover:bg-secondary hover:shadow-sm transition-all gap-3">
-                <div className="flex items-center gap-3 md:gap-4 min-w-0">
-                  <div className={`p-2 md:p-3 rounded-xl shrink-0 ${t.type === 'revenu' ? 'bg-success/10 text-success' : 'bg-destructive/10 text-destructive'}`}>
-                    {t.type === 'revenu' ? <ArrowUpRight size={18} /> : <ArrowDownRight size={18} />}
+              <div key={t.id} className="flex items-center justify-between p-3 md:p-4 rounded-xl bg-secondary/50 hover:bg-secondary transition-colors gap-3">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className={`p-2 rounded-lg shrink-0 ${t.type === 'revenu' ? 'bg-success/10 text-success' : 'bg-destructive/10 text-destructive'}`}>
+                    {t.type === 'revenu' ? <ArrowUpRight size={16} /> : <ArrowDownRight size={16} />}
                   </div>
                   <div className="min-w-0">
-                    <p className="font-medium text-foreground text-sm md:text-base truncate">{t.description}</p>
-                    <p className="text-xs md:text-sm text-muted-foreground">{t.category} • {new Date(t.date).toLocaleDateString('fr-FR')}</p>
+                    <p className="font-medium text-foreground text-[13px] truncate">{t.description}</p>
+                    <p className="text-[11px] text-muted-foreground">{t.category} · {new Date(t.date).toLocaleDateString('fr-FR')}</p>
                   </div>
                 </div>
-                <p className={`font-bold text-sm md:text-base whitespace-nowrap ${t.type === 'revenu' ? 'text-success' : 'text-destructive'}`}>
+                <p className={`font-bold text-[13px] whitespace-nowrap ${t.type === 'revenu' ? 'text-success' : 'text-destructive'}`}>
                   {t.type === 'revenu' ? '+' : '-'} {formatAmount(t.amount)}
                 </p>
               </div>

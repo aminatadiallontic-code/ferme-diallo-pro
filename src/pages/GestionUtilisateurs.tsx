@@ -24,8 +24,8 @@ interface User {
 }
 
 const roleColors: Record<string, string> = {
-  'Administrateur': 'bg-success/10 text-success border border-success/30',
-  'Gestionnaire': 'bg-primary/10 text-primary border border-primary/30',
+  'Administrateur': 'bg-success/10 text-success',
+  'Gestionnaire': 'bg-primary/10 text-primary',
 };
 
 const statusColors: Record<string, string> = {
@@ -67,13 +67,13 @@ const GestionUtilisateurs = () => {
 
   const handleApproveReset = (email: string) => {
     const tempPwd = approveResetRequest(email);
-    toast.success(`Mot de passe réinitialisé pour ${email}`, { description: `Nouveau mot de passe temporaire: ${tempPwd}`, duration: 15000 });
+    toast.success(`Mot de passe réinitialisé pour ${email}`, { description: `Nouveau mot de passe: ${tempPwd}`, duration: 15000 });
     loadUsers();
   };
 
   const handleRejectReset = (email: string) => {
     rejectResetRequest(email);
-    toast.info(`Demande de réinitialisation rejetée pour ${email}`);
+    toast.info(`Demande rejetée pour ${email}`);
     loadUsers();
   };
 
@@ -103,32 +103,32 @@ const GestionUtilisateurs = () => {
   };
 
   return (
-    <div className="animate-fade-in">
-      <div className="flex items-center justify-between gap-3 mb-2">
+    <div className="animate-fade-in space-y-6">
+      <div className="flex items-center justify-between gap-3">
         <Header title="Utilisateurs" />
         <ExportBar onExportCSV={handleExportCSV} onPrint={handlePrint} />
       </div>
 
-      {/* Reset Requests Banner */}
+      {/* Reset Requests */}
       {resetRequests.length > 0 && (
-        <div className="mb-6 card-xl p-4 md:p-6 border-2 border-warning/30 bg-warning/5">
-          <h3 className="text-base font-bold text-foreground mb-3 flex items-center gap-2">
-            <KeyRound size={18} className="text-warning" />
+        <div className="card-xl p-5 border-warning/30 bg-warning/[0.03]">
+          <h3 className="text-sm font-bold text-foreground mb-3 flex items-center gap-2">
+            <KeyRound size={16} className="text-warning" />
             Demandes de réinitialisation ({resetRequests.length})
           </h3>
-          <div className="space-y-3">
+          <div className="space-y-2">
             {resetRequests.map((req) => (
-              <div key={req.email} className="flex items-center justify-between p-3 rounded-xl bg-card border border-border gap-3">
+              <div key={req.email} className="flex items-center justify-between p-3 rounded-xl bg-card border border-border/60 gap-3">
                 <div>
-                  <p className="font-medium text-foreground text-sm">{req.email}</p>
-                  <p className="text-xs text-muted-foreground">Demandé le {new Date(req.requestedAt).toLocaleDateString('fr-FR')}</p>
+                  <p className="font-medium text-foreground text-[13px]">{req.email}</p>
+                  <p className="text-[11px] text-muted-foreground">Demandé le {new Date(req.requestedAt).toLocaleDateString('fr-FR')}</p>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Button size="sm" onClick={() => handleApproveReset(req.email)} className="rounded-lg gap-1 bg-success hover:bg-success/90 text-success-foreground h-8">
-                    <Check size={14} /> Approuver
+                <div className="flex items-center gap-1.5">
+                  <Button size="sm" onClick={() => handleApproveReset(req.email)} className="rounded-lg gap-1 bg-success hover:bg-success/90 text-success-foreground h-8 text-xs">
+                    <Check size={13} /> Approuver
                   </Button>
-                  <Button size="sm" variant="outline" onClick={() => handleRejectReset(req.email)} className="rounded-lg gap-1 h-8 text-destructive hover:text-destructive">
-                    <X size={14} /> Rejeter
+                  <Button size="sm" variant="outline" onClick={() => handleRejectReset(req.email)} className="rounded-lg gap-1 h-8 text-xs text-destructive hover:text-destructive">
+                    <X size={13} /> Rejeter
                   </Button>
                 </div>
               </div>
@@ -137,73 +137,88 @@ const GestionUtilisateurs = () => {
         </div>
       )}
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-8">
-        <div className="stat-card hover:shadow-lg hover:-translate-y-0.5 transition-all">
+      {/* Stats */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+        <div className="stat-card">
           <div className="flex items-center justify-between">
-            <div><p className="text-xs md:text-sm text-muted-foreground mb-1">Total</p><p className="text-2xl md:text-3xl font-bold text-foreground">{totalUsers}</p></div>
-            <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-primary/10 flex items-center justify-center"><Users className="text-primary" size={20} /></div>
+            <div>
+              <p className="text-xs text-muted-foreground mb-0.5">Total</p>
+              <p className="text-xl font-extrabold text-foreground">{totalUsers}</p>
+            </div>
+            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center"><Users className="text-primary" size={18} /></div>
           </div>
         </div>
-        <div className="stat-card hover:shadow-lg hover:-translate-y-0.5 transition-all">
+        <div className="stat-card">
           <div className="flex items-center justify-between">
-            <div><p className="text-xs md:text-sm text-muted-foreground mb-1">Actifs</p><p className="text-2xl md:text-3xl font-bold text-foreground">{activeUsers}</p></div>
-            <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-success/10 flex items-center justify-center"><TrendingUp className="text-success" size={20} /></div>
+            <div>
+              <p className="text-xs text-muted-foreground mb-0.5">Actifs</p>
+              <p className="text-xl font-extrabold text-foreground">{activeUsers}</p>
+            </div>
+            <div className="w-10 h-10 rounded-xl bg-success/10 flex items-center justify-center"><TrendingUp className="text-success" size={18} /></div>
           </div>
         </div>
-        <div className="stat-card hover:shadow-lg hover:-translate-y-0.5 transition-all">
+        <div className="stat-card">
           <div className="flex items-center justify-between">
-            <div><p className="text-xs md:text-sm text-muted-foreground mb-1">Admins</p><p className="text-2xl md:text-3xl font-bold text-foreground">{admins}</p></div>
-            <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-warning/10 flex items-center justify-center"><Home className="text-warning" size={20} /></div>
+            <div>
+              <p className="text-xs text-muted-foreground mb-0.5">Admins</p>
+              <p className="text-xl font-extrabold text-foreground">{admins}</p>
+            </div>
+            <div className="w-10 h-10 rounded-xl bg-warning/10 flex items-center justify-center"><Home className="text-warning" size={18} /></div>
           </div>
         </div>
-        <div className="stat-card hover:shadow-lg hover:-translate-y-0.5 transition-all">
+        <div className="stat-card">
           <div className="flex items-center justify-between">
-            <div><p className="text-xs md:text-sm text-muted-foreground mb-1">Gestionnaires</p><p className="text-2xl md:text-3xl font-bold text-foreground">{gestionnaires}</p></div>
-            <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-accent/10 flex items-center justify-center"><Activity className="text-accent" size={20} /></div>
+            <div>
+              <p className="text-xs text-muted-foreground mb-0.5">Gestionnaires</p>
+              <p className="text-xl font-extrabold text-foreground">{gestionnaires}</p>
+            </div>
+            <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center"><Activity className="text-accent" size={18} /></div>
           </div>
         </div>
       </div>
 
-      {/* Search & Add */}
-      <div className="card-xl p-4 md:p-6">
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 mb-6">
+      {/* Search & Table */}
+      <div className="card-xl p-5 md:p-6">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 mb-5">
           <div className="relative flex-1">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" size={20} />
-            <Input placeholder="Rechercher un utilisateur..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-12 h-12 rounded-xl bg-muted/50 border-0" />
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" size={16} />
+            <Input placeholder="Rechercher..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-10 h-10 rounded-xl bg-secondary/60 border-0 text-sm" />
           </div>
           <AddUserDialog onUserAdded={loadUsers} />
         </div>
 
-        <div className="rounded-xl border border-border overflow-x-auto">
+        <div className="rounded-xl border border-border/60 overflow-x-auto">
           <Table>
             <TableHeader>
-              <TableRow className="bg-muted/30 hover:bg-muted/30">
-                <TableHead className="font-semibold">Utilisateur</TableHead>
-                <TableHead className="font-semibold">Rôle</TableHead>
-                <TableHead className="font-semibold hidden sm:table-cell">Statut</TableHead>
-                <TableHead className="font-semibold text-right">Actions</TableHead>
+              <TableRow className="bg-secondary/40 hover:bg-secondary/40">
+                <TableHead className="font-semibold text-xs">Utilisateur</TableHead>
+                <TableHead className="font-semibold text-xs">Rôle</TableHead>
+                <TableHead className="font-semibold text-xs hidden sm:table-cell">Statut</TableHead>
+                <TableHead className="font-semibold text-xs text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filteredUsers.map((user) => (
-                <TableRow key={user.id} className="hover:bg-muted/20">
+                <TableRow key={user.id} className="hover:bg-secondary/20">
                   <TableCell>
-                    <div><p className="font-medium text-foreground">{user.name}</p><p className="text-xs md:text-sm text-muted-foreground">{user.email}</p></div>
+                    <div>
+                      <p className="font-semibold text-foreground text-[13px]">{user.name}</p>
+                      <p className="text-[11px] text-muted-foreground">{user.email}</p>
+                    </div>
                   </TableCell>
                   <TableCell>
-                    <span className={`inline-flex px-2 md:px-3 py-1 rounded-full text-xs font-medium ${roleColors[user.role]}`}>{user.role}</span>
+                    <span className={`inline-flex px-2.5 py-0.5 rounded-full text-[11px] font-semibold ${roleColors[user.role]}`}>{user.role}</span>
                   </TableCell>
                   <TableCell className="hidden sm:table-cell">
                     <div className="flex items-center gap-2">
                       <Switch checked={user.status === 'Actif'} onCheckedChange={() => { toggleUserStatus(user.email); loadUsers(); }} />
-                      <span className={`inline-flex px-3 py-1 rounded-full text-xs font-medium ${statusColors[user.status]}`}>{user.status}</span>
+                      <span className={`inline-flex px-2.5 py-0.5 rounded-full text-[11px] font-semibold ${statusColors[user.status]}`}>{user.status}</span>
                     </div>
                   </TableCell>
                   <TableCell>
-                    <div className="flex items-center justify-end gap-1 md:gap-2">
-                      <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10" onClick={() => setDeleteTarget(user)}>
-                        <Trash2 size={16} />
+                    <div className="flex items-center justify-end">
+                      <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10 rounded-lg" onClick={() => setDeleteTarget(user)}>
+                        <Trash2 size={15} />
                       </Button>
                     </div>
                   </TableCell>
@@ -214,16 +229,20 @@ const GestionUtilisateurs = () => {
         </div>
 
         {filteredUsers.length === 0 && (
-          <div className="text-center py-12 text-muted-foreground"><p>Aucun utilisateur trouvé</p></div>
+          <div className="empty-state py-10">
+            <div className="empty-state-icon"><Users size={24} /></div>
+            <p className="text-sm font-medium text-muted-foreground">Aucun utilisateur trouvé</p>
+          </div>
         )}
       </div>
 
-      {/* Delete Confirmation */}
       <AlertDialog open={!!deleteTarget} onOpenChange={() => setDeleteTarget(null)}>
         <AlertDialogContent className="rounded-2xl">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-xl font-bold">Supprimer cet utilisateur ?</AlertDialogTitle>
-            <AlertDialogDescription>Êtes-vous sûr de vouloir supprimer <strong>{deleteTarget?.name}</strong> ? Cette action est irréversible.</AlertDialogDescription>
+            <AlertDialogTitle className="text-lg font-extrabold">Supprimer cet utilisateur ?</AlertDialogTitle>
+            <AlertDialogDescription className="text-sm">
+              Êtes-vous sûr de vouloir supprimer <strong>{deleteTarget?.name}</strong> ? Cette action est irréversible.
+            </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel className="rounded-xl">Annuler</AlertDialogCancel>
