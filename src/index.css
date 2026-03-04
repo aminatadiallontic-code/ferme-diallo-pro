@@ -1,91 +1,89 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Ferme Diallo Design System - Avicole Management */
+/* Ferme Diallo — Pro Design System */
 
 @layer base {
   :root {
-    /* Page Background */
-    --background: 210 40% 98%;
-    --foreground: 215 50% 14%;
+    /* Page Background - warm neutral */
+    --background: 220 20% 97%;
+    --foreground: 220 40% 13%;
 
-    /* Cards - Pure White */
+    /* Cards */
     --card: 0 0% 100%;
-    --card-foreground: 215 50% 14%;
+    --card-foreground: 220 40% 13%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 215 50% 14%;
+    --popover-foreground: 220 40% 13%;
 
-    /* Primary - Marine Profond */
-    --primary: 215 50% 14%;
+    /* Primary - Marine */
+    --primary: 220 40% 13%;
     --primary-foreground: 0 0% 100%;
 
-    /* Secondary - Subtle gray */
-    --secondary: 210 40% 96%;
-    --secondary-foreground: 215 50% 14%;
+    /* Secondary */
+    --secondary: 220 20% 95%;
+    --secondary-foreground: 220 40% 13%;
 
     /* Muted */
-    --muted: 210 40% 96%;
-    --muted-foreground: 215 16% 47%;
+    --muted: 220 14% 93%;
+    --muted-foreground: 220 10% 46%;
 
-    /* Accent - Vert Émeraude */
+    /* Accent - Émeraude */
     --accent: 160 84% 39%;
     --accent-foreground: 0 0% 100%;
 
-    /* Success - Vert Émeraude */
+    /* Success */
     --success: 160 84% 39%;
     --success-foreground: 0 0% 100%;
 
-    /* Destructive - Rose Corail */
-    --destructive: 350 89% 60%;
+    /* Destructive */
+    --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
 
-    /* Warning - Orange */
+    /* Warning */
     --warning: 38 92% 50%;
     --warning-foreground: 0 0% 100%;
 
-    --border: 214 32% 91%;
-    --input: 214 32% 91%;
-    --ring: 215 50% 14%;
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 160 84% 39%;
 
-    /* Custom radius for cards */
-    --radius: 0.5rem;
-    --radius-card: 40px;
+    --radius: 0.75rem;
+    --radius-card: 24px;
 
     /* Sidebar */
-    --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 215 50% 14%;
-    --sidebar-primary: 215 50% 14%;
+    --sidebar-background: 220 40% 13%;
+    --sidebar-foreground: 220 14% 80%;
+    --sidebar-primary: 160 84% 39%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 210 40% 96%;
-    --sidebar-accent-foreground: 215 50% 14%;
-    --sidebar-border: 214 32% 91%;
-    --sidebar-ring: 215 50% 14%;
-
-    /* Gradients */
-    --gradient-success: linear-gradient(180deg, hsl(160 84% 39%) 0%, hsl(160 84% 39% / 0.1) 100%);
-    --gradient-coral: linear-gradient(180deg, hsl(350 89% 60%) 0%, hsl(350 89% 60% / 0.1) 100%);
+    --sidebar-accent: 220 30% 20%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 220 30% 20%;
+    --sidebar-ring: 160 84% 39%;
+    --sidebar-muted: 220 20% 60%;
   }
 
   .dark {
-    --background: 215 50% 8%;
-    --foreground: 210 40% 98%;
+    --background: 220 30% 6%;
+    --foreground: 220 14% 93%;
 
-    --card: 215 50% 12%;
-    --card-foreground: 210 40% 98%;
+    --card: 220 30% 10%;
+    --card-foreground: 220 14% 93%;
 
-    --popover: 215 50% 12%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 220 30% 10%;
+    --popover-foreground: 220 14% 93%;
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 215 50% 14%;
+    --primary: 220 14% 93%;
+    --primary-foreground: 220 40% 13%;
 
-    --secondary: 215 32% 18%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 220 25% 14%;
+    --secondary-foreground: 220 14% 93%;
 
-    --muted: 215 32% 18%;
-    --muted-foreground: 215 20% 65%;
+    --muted: 220 25% 14%;
+    --muted-foreground: 220 10% 55%;
 
     --accent: 160 84% 39%;
     --accent-foreground: 0 0% 100%;
@@ -93,24 +91,25 @@
     --success: 160 84% 39%;
     --success-foreground: 0 0% 100%;
 
-    --destructive: 350 62% 45%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 62% 50%;
+    --destructive-foreground: 220 14% 93%;
 
     --warning: 38 92% 50%;
     --warning-foreground: 0 0% 100%;
 
-    --border: 215 32% 18%;
-    --input: 215 32% 18%;
-    --ring: 212 27% 84%;
+    --border: 220 25% 18%;
+    --input: 220 25% 18%;
+    --ring: 160 84% 39%;
 
-    --sidebar-background: 215 50% 10%;
-    --sidebar-foreground: 210 40% 98%;
+    --sidebar-background: 220 35% 8%;
+    --sidebar-foreground: 220 14% 75%;
     --sidebar-primary: 160 84% 39%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 215 32% 18%;
-    --sidebar-accent-foreground: 210 40% 98%;
-    --sidebar-border: 215 32% 18%;
+    --sidebar-accent: 220 30% 14%;
+    --sidebar-accent-foreground: 220 14% 93%;
+    --sidebar-border: 220 30% 14%;
     --sidebar-ring: 160 84% 39%;
+    --sidebar-muted: 220 15% 50%;
   }
 }
 
@@ -121,95 +120,105 @@
 
   body {
     @apply bg-background text-foreground antialiased;
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
     font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  /* Smooth scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--muted-foreground) / 0.2);
+    border-radius: 10px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--muted-foreground) / 0.35);
   }
 }
 
 @layer components {
-  /* Card with 40px radius */
+  /* Card with soft radius */
   .card-xl {
-    @apply bg-card rounded-[40px] shadow-sm border border-border/50;
+    @apply bg-card rounded-[var(--radius-card)] border border-border/60;
+    box-shadow: 0 1px 3px 0 hsl(var(--foreground) / 0.04),
+                0 1px 2px -1px hsl(var(--foreground) / 0.04);
   }
 
-  /* Stat card styling */
+  /* Stat card */
   .stat-card {
-    @apply card-xl p-6 transition-all duration-300 hover:shadow-md;
+    @apply card-xl p-5 md:p-6 transition-all duration-300;
   }
 
-  /* Sidebar nav item */
-  .nav-item {
-    @apply flex items-center gap-3 px-4 py-3 rounded-xl text-muted-foreground transition-all duration-200;
-    @apply hover:bg-secondary hover:text-foreground;
-  }
-
-  .nav-item.active {
-    @apply bg-primary text-primary-foreground font-medium;
+  .stat-card:hover {
+    box-shadow: 0 8px 30px -8px hsl(var(--foreground) / 0.08),
+                0 4px 10px -4px hsl(var(--foreground) / 0.04);
+    transform: translateY(-2px);
   }
 
   /* Badge styles */
   .badge-success {
-    @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-medium;
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold;
     @apply bg-success/10 text-success;
   }
 
   .badge-danger {
-    @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-medium;
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold;
     @apply bg-destructive/10 text-destructive;
   }
 
   .badge-warning {
-    @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-medium;
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold;
     @apply bg-warning/10 text-warning;
   }
 
-  /* Button press effect */
+  /* Button press */
   .btn-press {
-    @apply transition-transform duration-100 active:scale-95;
+    @apply transition-all duration-150 active:scale-[0.97];
+  }
+
+  /* Empty state */
+  .empty-state {
+    @apply flex flex-col items-center justify-center py-16 text-center;
+  }
+
+  .empty-state-icon {
+    @apply w-16 h-16 rounded-2xl bg-muted/80 flex items-center justify-center mb-4 text-muted-foreground;
   }
 }
 
 @layer utilities {
-  /* Animation utilities */
   .animate-fade-in {
-    animation: fadeIn 0.3s ease-out;
+    animation: fadeIn 0.4s ease-out;
   }
 
   .animate-slide-in {
-    animation: slideIn 0.3s ease-out;
+    animation: slideIn 0.4s cubic-bezier(0.22, 1, 0.36, 1);
   }
 
   .animate-scale-in {
-    animation: scaleIn 0.2s ease-out;
+    animation: scaleIn 0.3s cubic-bezier(0.22, 1, 0.36, 1);
   }
 
   @keyframes fadeIn {
-    from {
-      opacity: 0;
-    }
-    to {
-      opacity: 1;
-    }
+    from { opacity: 0; }
+    to { opacity: 1; }
   }
 
   @keyframes slideIn {
-    from {
-      opacity: 0;
-      transform: translateY(10px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
   }
 
   @keyframes scaleIn {
-    from {
-      opacity: 0;
-      transform: scale(0.95);
-    }
-    to {
-      opacity: 1;
-      transform: scale(1);
-    }
+    from { opacity: 0; transform: scale(0.96); }
+    to { opacity: 1; transform: scale(1); }
   }
 }
