@@ -1,7 +1,7 @@
 import { NavLink, useNavigate } from 'react-router-dom';
 import { 
   Users, Wallet, Settings, BarChart3, Package, LogOut,
-  LayoutDashboard, UserCheck, ChevronRight
+  LayoutDashboard, UserCheck, Bell
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
