@@ -23,6 +23,7 @@ const Sidebar = ({ isMobile = false, onNavClick }: SidebarProps) => {
     { icon: Wallet, label: 'Finance', path: '/dashboard/finance', section: 'finance' },
     { icon: Package, label: 'Stocks', path: '/dashboard/stocks', section: 'stocks' },
     { icon: BarChart3, label: 'Rapports', path: '/dashboard/rapports', section: 'rapports' },
+    { icon: Bell, label: 'Alertes', path: '/dashboard/alertes', section: 'alertes' },
     { icon: Settings, label: 'Paramètres', path: '/dashboard/parametres', section: 'parametres' },
   ];
 

@@ -23,24 +23,26 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <AuthProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Login />} />
-            <Route path="/dashboard" element={<DashboardLayout />}>
-              <Route index element={<Dashboard />} />
-              <Route path="utilisateurs" element={<GestionUtilisateurs />} />
-              <Route path="clients" element={<Clients />} />
-              <Route path="finance" element={<Finance />} />
-              <Route path="parametres" element={<Parametres />} />
-              <Route path="rapports" element={<Rapports />} />
-              <Route path="stocks" element={<Stocks />} />
-            </Route>
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
+        <NotificationProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<Login />} />
+              <Route path="/dashboard" element={<DashboardLayout />}>
+                <Route index element={<Dashboard />} />
+                <Route path="utilisateurs" element={<GestionUtilisateurs />} />
+                <Route path="clients" element={<Clients />} />
+                <Route path="finance" element={<Finance />} />
+                <Route path="parametres" element={<Parametres />} />
+                <Route path="rapports" element={<Rapports />} />
+                <Route path="stocks" element={<Stocks />} />
+                <Route path="alertes" element={<Alertes />} />
+              </Route>
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </NotificationProvider>
       </AuthProvider>
     </TooltipProvider>
   </QueryClientProvider>
