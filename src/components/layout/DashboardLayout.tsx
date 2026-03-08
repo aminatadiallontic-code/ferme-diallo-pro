@@ -3,6 +3,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { MobileSidebarProvider, useMobileSidebar } from '@/contexts/SidebarContext';
 import { useIsMobile } from '@/hooks/use-mobile';
 import Sidebar from './Sidebar';
+import ChatBot from '@/components/ChatBot';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
 
 const DashboardContent = () => {
