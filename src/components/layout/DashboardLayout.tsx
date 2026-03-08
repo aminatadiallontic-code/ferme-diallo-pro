@@ -32,6 +32,7 @@ const DashboardContent = () => {
       <main className={`flex-1 ${isMobile ? 'px-4 py-4' : 'ml-[260px] px-8 py-6'} animate-fade-in max-w-[1400px]`}>
         <Outlet />
       </main>
+      <ChatBot />
     </div>
   );
 };
