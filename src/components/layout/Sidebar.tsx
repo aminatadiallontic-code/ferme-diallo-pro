@@ -27,11 +27,13 @@ const Sidebar = ({ isMobile = false, onNavClick }: SidebarProps) => {
     { icon: Settings, label: 'Paramètres', path: '/dashboard/parametres', section: 'parametres' },
   ];
 
-  const navItems = allNavItems.filter(item => hasAccess(item.section));
+  const navItems = user?.role === 'client'
+    ? [{ icon: LayoutDashboard, label: 'Mon espace', path: '/dashboard/client', section: 'client' }]
+    : allNavItems.filter(item => hasAccess(item.section));
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     onNavClick?.();
-    logout();
+    await logout();
     navigate('/');
   };
 
@@ -52,7 +54,7 @@ const Sidebar = ({ isMobile = false, onNavClick }: SidebarProps) => {
               Ferme Diallo
             </h1>
             <p className="text-[11px] text-sidebar-muted capitalize leading-tight mt-0.5">
-              {user?.role === 'fermier' ? 'Administrateur' : user?.role || 'Utilisateur'}
+              {user?.role === 'fermier' ? 'Administrateur' : user?.role === 'gestionnaire' ? 'Gestionnaire' : user?.role === 'client' ? 'Client' : user?.role || 'Utilisateur'}
             </p>
           </div>
         </div>

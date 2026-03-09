@@ -1,73 +1,86 @@
-# Welcome to your Lovable project
+# Ferme Diallo (Frontend React + Backend Laravel)
 
-## Project info
+## Démarrage en local
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+### Backend (Laravel API)
 
-## How can I edit this code?
-
-There are several ways of editing your application.
-
-**Use Lovable**
-
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
+Depuis le dossier `backend` :
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+php artisan serve --host=127.0.0.1 --port=8000
+```
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+URL backend :
 
-# Step 3: Install the necessary dependencies.
-npm i
+- `http://127.0.0.1:8000`
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+Les endpoints API sont sous :
+
+- `http://127.0.0.1:8000/api/...`
+
+### Frontend (Vite / React)
+
+Depuis la racine du projet :
+
+```sh
+npm install
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+URL frontend :
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+- Vite affiche l’URL dans le terminal (souvent `http://localhost:5173`)
 
-**Use GitHub Codespaces**
+Note : en développement, le frontend appelle l’API via le proxy Vite sur `/api`.
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## Connexion (auth + rôles)
 
-## What technologies are used for this project?
+L’application utilise une authentification API (Sanctum, token Bearer). Après connexion, le token est stocké dans le navigateur.
 
-This project is built with:
+### Comptes de test
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+- **Admin (fermier)**
+  - Email : `admin@gmail.com`
+  - Mot de passe : `Di@llo2026`
 
-## How can I deploy this project?
+- **Gestionnaire**
+  - Email : `gestionnaire@gmail.com`
+  - Mot de passe : `Gest@2026`
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+### Règles d’accès (rôles)
 
-## Can I connect a custom domain to my Lovable project?
+- **Clients** : accessible à tout utilisateur authentifié
+- **Stocks** : accessible à tout utilisateur authentifié
+- **Finance (Transactions)** : accessible uniquement au rôle **`fermier`**
 
-Yes, you can!
+## Routes API principales
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+### Auth
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+- `POST /api/auth/login`
+- `GET /api/auth/me`
+- `POST /api/auth/logout`
+
+### Ressources protégées (auth:sanctum)
+
+- `GET/POST/PUT/DELETE /api/clients`
+- `GET/POST/PUT/PATCH/DELETE /api/stock-items`
+- `PATCH /api/stock-items/{id}/quantity`
+
+### Finance (protégée + role:fermier)
+
+- `GET/POST/PUT/DELETE /api/transactions`
+
+## Base de données (seed)
+
+Depuis `backend` :
+
+```sh
+php artisan migrate
+php artisan db:seed
+```
+
+Le seeding crée :
+
+- des articles de stock (`stock_items`)
+- les comptes de test ci-dessus (`users`)

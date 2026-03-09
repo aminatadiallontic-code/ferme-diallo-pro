@@ -15,6 +15,8 @@ import Parametres from "./pages/Parametres";
 import Rapports from "./pages/Rapports";
 import Stocks from "./pages/Stocks";
 import Alertes from "./pages/Alertes";
+import ClientOrders from "./pages/ClientOrders";
+import ClientDashboard from "./pages/ClientDashboard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -32,7 +34,9 @@ const App = () => (
               <Route path="/dashboard" element={<DashboardLayout />}>
                 <Route index element={<Dashboard />} />
                 <Route path="utilisateurs" element={<GestionUtilisateurs />} />
+                <Route path="client" element={<ClientDashboard />} />
                 <Route path="clients" element={<Clients />} />
+                <Route path="clients/:id/commandes" element={<ClientOrders />} />
                 <Route path="finance" element={<Finance />} />
                 <Route path="parametres" element={<Parametres />} />
                 <Route path="rapports" element={<Rapports />} />

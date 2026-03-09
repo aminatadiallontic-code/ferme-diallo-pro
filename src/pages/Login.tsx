@@ -16,12 +16,18 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showResetForm, setShowResetForm] = useState(false);
   const [resetEmail, setResetEmail] = useState('');
+  const [showRegisterForm, setShowRegisterForm] = useState(false);
+  const [registerName, setRegisterName] = useState('');
+  const [registerEmail, setRegisterEmail] = useState('');
+  const [registerPassword, setRegisterPassword] = useState('');
 
-  const { login, isAuthenticated, requestPasswordReset } = useAuth();
+  const { login, register, isAuthenticated, requestPasswordReset } = useAuth();
   const navigate = useNavigate();
 
   if (isAuthenticated) {
-    return <Navigate to="/dashboard" replace />;
+    const stored = localStorage.getItem('ferme_diallo_user');
+    const role = stored ? (JSON.parse(stored)?.role as string | undefined) : undefined;
+    return <Navigate to={role === 'client' ? '/dashboard/client' : '/dashboard'} replace />;
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -29,12 +35,34 @@ const Login = () => {
     setError('');
     setIsLoading(true);
     await new Promise(resolve => setTimeout(resolve, 500));
-    const result = login(email, password);
+    const result = await login(email, password);
     if (result) {
-      navigate('/dashboard');
+      const stored = localStorage.getItem('ferme_diallo_user');
+      const role = stored ? (JSON.parse(stored)?.role as string | undefined) : undefined;
+      navigate(role === 'client' ? '/dashboard/client' : '/dashboard');
     } else {
       setError('Email ou mot de passe incorrect, ou compte inactif.');
     }
+    setIsLoading(false);
+  };
+
+  const handleRegister = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setIsLoading(true);
+
+    const ok = await register({
+      name: registerName.trim(),
+      email: registerEmail.trim(),
+      password: registerPassword,
+    });
+
+    if (ok) {
+      navigate('/dashboard/client');
+    } else {
+      setError("Impossible de créer le compte. Vérifie l'email et le mot de passe.");
+    }
+
     setIsLoading(false);
   };
 
@@ -111,6 +139,63 @@ const Login = () => {
               </Button>
             </form>
           </>
+        ) : showRegisterForm ? (
+          <>
+            <button
+              onClick={() => { setShowRegisterForm(false); setError(''); setSuccess(''); }}
+              className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground mb-4 transition-colors font-medium"
+            >
+              <ArrowLeft size={14} /> Retour
+            </button>
+            <h2 className="text-xl font-extrabold text-foreground mb-1 tracking-tight">Créer un compte</h2>
+            <p className="text-xs text-muted-foreground mb-5">Vous serez connecté en tant que client.</p>
+
+            <form onSubmit={handleRegister} className="space-y-4">
+              <div className="space-y-1.5">
+                <Label htmlFor="register-name" className="text-xs font-medium">Nom complet</Label>
+                <Input
+                  id="register-name"
+                  placeholder="Votre nom"
+                  value={registerName}
+                  onChange={(e) => setRegisterName(e.target.value)}
+                  className="h-11 rounded-xl bg-secondary/80 border-0"
+                  required
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="register-email" className="text-xs font-medium">Email</Label>
+                <Input
+                  id="register-email"
+                  type="email"
+                  placeholder="votre@email.com"
+                  value={registerEmail}
+                  onChange={(e) => setRegisterEmail(e.target.value)}
+                  className="h-11 rounded-xl bg-secondary/80 border-0"
+                  required
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="register-password" className="text-xs font-medium">Mot de passe</Label>
+                <Input
+                  id="register-password"
+                  type={showPassword ? 'text' : 'password'}
+                  placeholder="Minimum 6 caractères"
+                  value={registerPassword}
+                  onChange={(e) => setRegisterPassword(e.target.value)}
+                  className="h-11 rounded-xl bg-secondary/80 border-0"
+                  required
+                />
+              </div>
+
+              {error && <div className="p-3 rounded-xl bg-destructive/5 text-destructive text-xs text-center animate-fade-in border border-destructive/10">{error}</div>}
+
+              <Button type="submit" className="w-full h-11 rounded-xl font-semibold bg-success hover:bg-success/90 text-success-foreground btn-press text-sm" disabled={isLoading}>
+                {isLoading ? 'Création...' : 'Créer et se connecter'}
+              </Button>
+            </form>
+          </>
         ) : (
           <>
             <h2 className="text-xl font-extrabold text-foreground mb-5 tracking-tight">Se connecter</h2>
@@ -147,6 +232,23 @@ const Login = () => {
                 <button type="button" onClick={() => { setShowResetForm(true); setError(''); }}
                   className="text-success text-xs hover:underline font-medium">
                   Mot de passe oublié ?
+                </button>
+              </div>
+
+              <div className="flex justify-end">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowRegisterForm(true);
+                    setError('');
+                    setSuccess('');
+                    setRegisterName('');
+                    setRegisterEmail('');
+                    setRegisterPassword('');
+                  }}
+                  className="text-success text-xs hover:underline font-medium"
+                >
+                  Créer un compte
                 </button>
               </div>
 
