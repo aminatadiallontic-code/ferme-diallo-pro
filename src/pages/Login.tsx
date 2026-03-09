@@ -20,6 +20,8 @@ const Login = () => {
   const [registerName, setRegisterName] = useState('');
   const [registerEmail, setRegisterEmail] = useState('');
   const [registerPassword, setRegisterPassword] = useState('');
+  const [registerPhone, setRegisterPhone] = useState('');
+  const [registerAddress, setRegisterAddress] = useState('');
 
   const { login, register, isAuthenticated, requestPasswordReset } = useAuth();
   const navigate = useNavigate();
@@ -55,6 +57,8 @@ const Login = () => {
       name: registerName.trim(),
       email: registerEmail.trim(),
       password: registerPassword,
+      phone: registerPhone.trim() || undefined,
+      address: registerAddress.trim() || undefined,
     });
 
     if (ok) {
@@ -177,6 +181,28 @@ const Login = () => {
               </div>
 
               <div className="space-y-1.5">
+                <Label htmlFor="register-phone" className="text-xs font-medium">Téléphone</Label>
+                <Input
+                  id="register-phone"
+                  placeholder="Ex: +224 62 123 45 67"
+                  value={registerPhone}
+                  onChange={(e) => setRegisterPhone(e.target.value)}
+                  className="h-11 rounded-xl bg-secondary/80 border-0"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="register-address" className="text-xs font-medium">Adresse</Label>
+                <Input
+                  id="register-address"
+                  placeholder="Ex: Conakry"
+                  value={registerAddress}
+                  onChange={(e) => setRegisterAddress(e.target.value)}
+                  className="h-11 rounded-xl bg-secondary/80 border-0"
+                />
+              </div>
+
+              <div className="space-y-1.5">
                 <Label htmlFor="register-password" className="text-xs font-medium">Mot de passe</Label>
                 <Input
                   id="register-password"
@@ -245,6 +271,8 @@ const Login = () => {
                     setRegisterName('');
                     setRegisterEmail('');
                     setRegisterPassword('');
+                    setRegisterPhone('');
+                    setRegisterAddress('');
                   }}
                   className="text-success text-xs hover:underline font-medium"
                 >

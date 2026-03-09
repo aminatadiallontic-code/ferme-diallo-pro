@@ -84,3 +84,9 @@ Le seeding crée :
 
 - des articles de stock (`stock_items`)
 - les comptes de test ci-dessus (`users`)
+ 
+
+
+
+ pour récupéré  le travail dont j'ai fait git fetch origin
+git checkout ousmaneback

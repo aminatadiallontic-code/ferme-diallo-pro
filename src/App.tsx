@@ -17,6 +17,7 @@ import Stocks from "./pages/Stocks";
 import Alertes from "./pages/Alertes";
 import ClientOrders from "./pages/ClientOrders";
 import ClientDashboard from "./pages/ClientDashboard";
+import MyOrders from "./pages/MyOrders";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -35,6 +36,7 @@ const App = () => (
                 <Route index element={<Dashboard />} />
                 <Route path="utilisateurs" element={<GestionUtilisateurs />} />
                 <Route path="client" element={<ClientDashboard />} />
+                <Route path="mes-commandes" element={<MyOrders />} />
                 <Route path="clients" element={<Clients />} />
                 <Route path="clients/:id/commandes" element={<ClientOrders />} />
                 <Route path="finance" element={<Finance />} />

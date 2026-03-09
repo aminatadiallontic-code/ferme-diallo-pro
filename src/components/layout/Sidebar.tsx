@@ -28,7 +28,10 @@ const Sidebar = ({ isMobile = false, onNavClick }: SidebarProps) => {
   ];
 
   const navItems = user?.role === 'client'
-    ? [{ icon: LayoutDashboard, label: 'Mon espace', path: '/dashboard/client', section: 'client' }]
+    ? [
+      { icon: LayoutDashboard, label: 'Mon espace', path: '/dashboard/client', section: 'client' },
+      { icon: UserCheck, label: 'Mes commandes', path: '/dashboard/mes-commandes', section: 'client_orders' },
+    ]
     : allNavItems.filter(item => hasAccess(item.section));
 
   const handleLogout = async () => {

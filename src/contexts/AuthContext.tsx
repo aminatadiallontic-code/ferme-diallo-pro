@@ -17,6 +17,7 @@ interface User {
   name: string;
   role: UserRole;
   status?: 'actif' | 'inactif';
+  client_id?: number | null;
 }
 
 export interface PasswordResetRequest {
@@ -29,7 +30,7 @@ interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<boolean>;
-  register: (payload: { name: string; email: string; password: string }) => Promise<boolean>;
+  register: (payload: { name: string; email: string; password: string; phone?: string; address?: string }) => Promise<boolean>;
   logout: () => Promise<void>;
   hasAccess: (section: string) => boolean;
   addUser: (userData: UserCredentials) => void;
@@ -106,12 +107,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  const register = useCallback(async (payload: { name: string; email: string; password: string }): Promise<boolean> => {
+  const register = useCallback(async (payload: { name: string; email: string; password: string; phone?: string; address?: string }): Promise<boolean> => {
     try {
       const resp = await api.post<{ token: string; user: User }>('/api/auth/register', {
         name: payload.name,
         email: payload.email,
         password: payload.password,
+        phone: payload.phone,
+        address: payload.address,
         device_name: 'web',
       });
 

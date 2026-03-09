@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Client;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
@@ -15,7 +16,16 @@ class AuthController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', 'unique:users,email'],
             'password' => ['required', 'string', Password::min(6)],
+            'phone' => ['nullable', 'string', 'max:50'],
+            'address' => ['nullable', 'string', 'max:255'],
             'device_name' => ['nullable', 'string', 'max:255'],
+        ]);
+
+        $client = Client::create([
+            'name' => $validated['name'],
+            'phone' => $validated['phone'] ?? '-',
+            'email' => $validated['email'],
+            'address' => $validated['address'] ?? '-',
         ]);
 
         $user = \App\Models\User::create([
@@ -24,6 +34,7 @@ class AuthController extends Controller
             'password' => Hash::make($validated['password']),
             'role' => 'client',
             'status' => 'actif',
+            'client_id' => $client->id,
         ]);
 
         $deviceName = $validated['device_name'] ?? 'web';
@@ -37,6 +48,7 @@ class AuthController extends Controller
                 'email' => $user->email,
                 'role' => $user->role,
                 'status' => $user->status,
+                'client_id' => $user->client_id,
             ],
         ], 201);
     }
@@ -70,13 +82,23 @@ class AuthController extends Controller
                 'email' => $user->email,
                 'role' => $user->role,
                 'status' => $user->status,
+                'client_id' => $user->client_id,
             ],
         ]);
     }
 
     public function me(Request $request)
     {
-        return response()->json($request->user());
+        $user = $request->user();
+
+        return response()->json([
+            'id' => $user->id,
+            'name' => $user->name,
+            'email' => $user->email,
+            'role' => $user->role,
+            'status' => $user->status,
+            'client_id' => $user->client_id,
+        ]);
     }
 
     public function logout(Request $request)

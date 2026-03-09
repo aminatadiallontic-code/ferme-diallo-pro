@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ClientController;
+use App\Http\Controllers\Api\ClientOrderController;
+use App\Http\Controllers\Api\ClientStockItemController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\StockItemController;
 use App\Http\Controllers\Api\TransactionController;
@@ -23,6 +25,12 @@ Route::middleware('auth:sanctum')->group(function () {
 
         Route::patch('stock-items/{stockItem}/quantity', [StockItemController::class, 'updateQuantity']);
         Route::apiResource('stock-items', StockItemController::class);
+    });
+
+    Route::middleware('role:client')->group(function () {
+        Route::get('client/orders', [ClientOrderController::class, 'index']);
+        Route::post('client/orders', [ClientOrderController::class, 'store']);
+        Route::get('client/stock-items', [ClientStockItemController::class, 'index']);
     });
 
     Route::middleware('role:fermier')->group(function () {
