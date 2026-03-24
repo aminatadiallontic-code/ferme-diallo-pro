@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('client_id')->constrained()->cascadeOnDelete();
             $table->date('order_date');
-            $table->enum('status', ['brouillon', 'confirmee', 'annulee'])->default('brouillon');
+            $table->enum('status', ['brouillon', 'confirmé', 'annulé'])->default('brouillon');
             $table->unsignedBigInteger('total_amount')->default(0);
             $table->timestamps();
         });

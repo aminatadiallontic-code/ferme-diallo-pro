@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
 import { api } from '@/lib/api';
 
-export type UserRole = 'fermier' | 'gestionnaire' | 'client';
+export type UserRole = 'fermier' | 'gestionnaire';
 
 interface UserCredentials {
   email: string;
@@ -30,7 +30,6 @@ interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<boolean>;
-  register: (payload: { name: string; email: string; password: string; phone?: string; address?: string }) => Promise<boolean>;
   logout: () => Promise<void>;
   hasAccess: (section: string) => boolean;
   addUser: (userData: UserCredentials) => void;
@@ -56,7 +55,6 @@ const DEFAULT_USERS: UserCredentials[] = [
 const ROLE_RESTRICTIONS: Record<UserRole, string[]> = {
   fermier: [],
   gestionnaire: ['finance', 'dashboard', 'utilisateurs', 'parametres'],
-  client: ['dashboard', 'clients', 'utilisateurs', 'finance', 'stocks', 'rapports', 'alertes', 'parametres'],
 };
 
 // Helper to get effective password for default users (supports overrides)
@@ -95,26 +93,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const resp = await api.post<{ token: string; user: User }>('/api/auth/login', {
         email,
         password,
-        device_name: 'web',
-      });
-
-      localStorage.setItem('ferme_diallo_api_token', resp.token);
-      localStorage.setItem('ferme_diallo_user', JSON.stringify(resp.user));
-      setUser(resp.user);
-      return true;
-    } catch {
-      return false;
-    }
-  }, []);
-
-  const register = useCallback(async (payload: { name: string; email: string; password: string; phone?: string; address?: string }): Promise<boolean> => {
-    try {
-      const resp = await api.post<{ token: string; user: User }>('/api/auth/register', {
-        name: payload.name,
-        email: payload.email,
-        password: payload.password,
-        phone: payload.phone,
-        address: payload.address,
         device_name: 'web',
       });
 
@@ -262,7 +240,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider value={{
-      user, isAuthenticated: !!user, login, register, logout, hasAccess, addUser,
+      user, isAuthenticated: !!user, login, logout, hasAccess, addUser,
       getAllUsers: getAllUsersWithStatus, removeUser, toggleUserStatus,
       updateProfile, updateLogo, logo,
       requestPasswordReset, getResetRequests, approveResetRequest, rejectResetRequest,

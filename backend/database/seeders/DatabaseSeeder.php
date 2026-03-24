@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        // Create admin user
         User::updateOrCreate(
             ['email' => 'admin@gmail.com'],
             [
@@ -28,6 +29,7 @@ class DatabaseSeeder extends Seeder
             ],
         );
 
+        // Create gestionnaire user
         User::updateOrCreate(
             ['email' => 'gestionnaire@gmail.com'],
             [
@@ -38,8 +40,13 @@ class DatabaseSeeder extends Seeder
             ],
         );
 
+        // Call other seeders
         $this->call([
             StockItemsSeeder::class,
         ]);
+
+        $this->command->info('Database seeded successfully!');
+        $this->command->info('Admin: admin@gmail.com / Di@llo2026');
+        $this->command->info('Gestionnaire: gestionnaire@gmail.com / Gest@2026');
     }
 }

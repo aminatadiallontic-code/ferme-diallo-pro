@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { exportToCSV, printSection } from '@/lib/exportUtils';
 import { api, type PaginatedResponse } from '@/lib/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import StockForm from '@/components/StockForm';
 
 interface StockItem {
   id: number; name: string; category: 'aliments' | 'vaccins' | 'oeufs';
@@ -17,6 +18,7 @@ const categoryLabels = { aliments: 'Aliments', vaccins: 'Vaccins', oeufs: 'Œufs
 
 const Stocks = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [showAddForm, setShowAddForm] = useState(false);
   const queryClient = useQueryClient();
 
   const { data: stocksResp } = useQuery({
@@ -74,8 +76,27 @@ const Stocks = () => {
     <div className="animate-slide-in space-y-6">
       <div className="flex items-center justify-between gap-3">
         <Header title="Stocks" />
-        <ExportBar onExportCSV={handleExportCSV} onPrint={handlePrint} />
+        <div className="flex items-center gap-3">
+          <Button 
+            onClick={() => setShowAddForm(true)}
+            className="rounded-xl btn-press text-xs h-9"
+          >
+            <Plus size={14} className="mr-2" />
+            Ajouter un article
+          </Button>
+          <ExportBar onExportCSV={handleExportCSV} onPrint={handlePrint} />
+        </div>
       </div>
+
+      {/* Add Stock Form */}
+      {showAddForm && (
+        <div className="flex justify-center">
+          <StockForm 
+            onSuccess={() => setShowAddForm(false)}
+            onCancel={() => setShowAddForm(false)}
+          />
+        </div>
+      )}
 
       {/* Status Overview */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4">

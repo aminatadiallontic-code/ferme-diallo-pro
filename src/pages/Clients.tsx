@@ -74,6 +74,29 @@ const Clients = () => {
       setEditOpen(false);
       toast({ title: 'Client modifié', description: `${updated.name} a été modifié avec succès.` });
     },
+    onError: (err: unknown) => {
+      setErrors({});
+
+      const message = err instanceof Error ? err.message : String(err);
+      try {
+        const parsed = JSON.parse(message) as { message?: string; errors?: Record<string, string[] | string> };
+        if (parsed?.errors) {
+          const fieldErrors: Record<string, string> = {};
+          for (const [key, value] of Object.entries(parsed.errors)) {
+            fieldErrors[key] = Array.isArray(value) ? String(value[0]) : String(value);
+          }
+          setErrors(fieldErrors);
+        }
+
+        toast({
+          title: 'Erreur',
+          description: parsed?.message ? String(parsed.message) : 'Impossible de modifier le client.',
+          variant: 'destructive',
+        });
+      } catch {
+        toast({ title: 'Erreur', description: message || 'Impossible de modifier le client.', variant: 'destructive' });
+      }
+    },
   });
 
   const deleteClientMutation = useMutation({
@@ -96,6 +119,29 @@ const Clients = () => {
       setErrors({});
       setOpen(false);
       toast({ title: 'Client ajouté', description: `${created.name} a été ajouté avec succès.` });
+    },
+    onError: (err: unknown) => {
+      setErrors({});
+
+      const message = err instanceof Error ? err.message : String(err);
+      try {
+        const parsed = JSON.parse(message) as { message?: string; errors?: Record<string, string[] | string> };
+        if (parsed?.errors) {
+          const fieldErrors: Record<string, string> = {};
+          for (const [key, value] of Object.entries(parsed.errors)) {
+            fieldErrors[key] = Array.isArray(value) ? String(value[0]) : String(value);
+          }
+          setErrors(fieldErrors);
+        }
+
+        toast({
+          title: 'Erreur',
+          description: parsed?.message ? String(parsed.message) : 'Impossible d’ajouter le client.',
+          variant: 'destructive',
+        });
+      } catch {
+        toast({ title: 'Erreur', description: message || 'Impossible d’ajouter le client.', variant: 'destructive' });
+      }
     },
   });
 
@@ -201,7 +247,7 @@ const Clients = () => {
               </div>
               <DialogFooter>
                 <DialogClose asChild><Button variant="outline" className="rounded-xl">Annuler</Button></DialogClose>
-                <Button onClick={handleAddClient} className="rounded-xl">Ajouter</Button>
+                <Button onClick={handleAddClient} className="rounded-xl" disabled={createClientMutation.isPending}>Ajouter</Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
@@ -242,7 +288,7 @@ const Clients = () => {
               </div>
               <DialogFooter>
                 <DialogClose asChild><Button variant="outline" className="rounded-xl">Annuler</Button></DialogClose>
-                <Button onClick={handleEditClient} className="rounded-xl">Enregistrer</Button>
+                <Button onClick={handleEditClient} className="rounded-xl" disabled={updateClientMutation.isPending}>Enregistrer</Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>

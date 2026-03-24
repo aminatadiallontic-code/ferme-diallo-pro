@@ -1,7 +1,7 @@
 import { NavLink, useNavigate } from 'react-router-dom';
 import { 
   Users, Wallet, Settings, BarChart3, Package, LogOut,
-  LayoutDashboard, UserCheck, Bell
+  LayoutDashboard, UserCheck, Bell, ShoppingCart
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -20,6 +20,7 @@ const Sidebar = ({ isMobile = false, onNavClick }: SidebarProps) => {
     { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard', section: 'dashboard' },
     { icon: Users, label: 'Utilisateurs', path: '/dashboard/utilisateurs', section: 'utilisateurs' },
     { icon: UserCheck, label: 'Clients', path: '/dashboard/clients', section: 'clients' },
+    { icon: ShoppingCart, label: 'Commandes', path: '/dashboard/commandes', section: 'commandes' },
     { icon: Wallet, label: 'Finance', path: '/dashboard/finance', section: 'finance' },
     { icon: Package, label: 'Stocks', path: '/dashboard/stocks', section: 'stocks' },
     { icon: BarChart3, label: 'Rapports', path: '/dashboard/rapports', section: 'rapports' },
@@ -27,12 +28,7 @@ const Sidebar = ({ isMobile = false, onNavClick }: SidebarProps) => {
     { icon: Settings, label: 'Paramètres', path: '/dashboard/parametres', section: 'parametres' },
   ];
 
-  const navItems = user?.role === 'client'
-    ? [
-      { icon: LayoutDashboard, label: 'Mon espace', path: '/dashboard/client', section: 'client' },
-      { icon: UserCheck, label: 'Mes commandes', path: '/dashboard/mes-commandes', section: 'client_orders' },
-    ]
-    : allNavItems.filter(item => hasAccess(item.section));
+  const navItems = allNavItems.filter(item => hasAccess(item.section));
 
   const handleLogout = async () => {
     onNavClick?.();
