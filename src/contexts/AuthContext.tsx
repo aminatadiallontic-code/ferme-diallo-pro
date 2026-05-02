@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
+import { api } from '@/lib/api';
 
 export type UserRole = 'fermier' | 'gestionnaire';
 
@@ -11,9 +12,12 @@ interface UserCredentials {
 }
 
 interface User {
+  id?: number;
   email: string;
   name: string;
   role: UserRole;
+  status?: 'actif' | 'inactif';
+  client_id?: number | null;
 }
 
 export interface PasswordResetRequest {
@@ -25,8 +29,8 @@ export interface PasswordResetRequest {
 interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
-  login: (email: string, password: string) => boolean;
-  logout: () => void;
+  login: (email: string, password: string) => Promise<boolean>;
+  logout: () => Promise<void>;
   hasAccess: (section: string) => boolean;
   addUser: (userData: UserCredentials) => void;
   getAllUsers: () => UserCredentials[];
@@ -84,29 +88,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return stored ? JSON.parse(stored) : [];
   });
 
-  const login = useCallback((email: string, password: string): boolean => {
-    const extras = JSON.parse(localStorage.getItem('ferme_diallo_extra_users') || '[]');
-    // Build effective user list with password overrides for defaults
-    const allUsers = [
-      ...DEFAULT_USERS.map(u => ({ ...u, password: getDefaultUserPassword(u.email, u.password) })),
-      ...extras,
-    ];
-    const found = allUsers.find((u: UserCredentials) => u.email === email && u.password === password);
-    if (found) {
-      const statuses = JSON.parse(localStorage.getItem('ferme_diallo_user_statuses') || '{}');
-      if (statuses[found.email] === 'inactif') return false;
-      
-      const userData: User = { email: found.email, name: found.name, role: found.role };
-      setUser(userData);
-      localStorage.setItem('ferme_diallo_user', JSON.stringify(userData));
+  const login = useCallback(async (email: string, password: string): Promise<boolean> => {
+    try {
+      const resp = await api.post<{ token: string; user: User }>('/api/auth/login', {
+        email,
+        password,
+        device_name: 'web',
+      });
+
+      localStorage.setItem('ferme_diallo_api_token', resp.token);
+      localStorage.setItem('ferme_diallo_user', JSON.stringify(resp.user));
+      setUser(resp.user);
       return true;
+    } catch {
+      return false;
     }
-    return false;
   }, []);
 
-  const logout = useCallback(() => {
+  const logout = useCallback(async () => {
+    try {
+      await api.post('/api/auth/logout', {});
+    } catch {
+      // ignore
+    }
+
     setUser(null);
     localStorage.removeItem('ferme_diallo_user');
+    localStorage.removeItem('ferme_diallo_api_token');
   }, []);
 
   const hasAccess = useCallback((section: string): boolean => {

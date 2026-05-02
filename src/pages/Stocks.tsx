@@ -4,35 +4,48 @@ import Header from '@/components/layout/Header';
 import ExportBar from '@/components/ExportBar';
 import { Button } from '@/components/ui/button';
 import { exportToCSV, printSection } from '@/lib/exportUtils';
+import { api, type PaginatedResponse } from '@/lib/api';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import StockForm from '@/components/StockForm';
 
 interface StockItem {
   id: number; name: string; category: 'aliments' | 'vaccins' | 'oeufs';
-  quantity: number; unit: string; threshold: number; lastUpdate: string;
+  quantity: number; unit: string; threshold: number; last_update: string | null;
 }
-
-const initialStocks: StockItem[] = [
-  { id: 1, name: 'Aliment croissance', category: 'aliments', quantity: 0, unit: 'kg', threshold: 500, lastUpdate: '' },
-  { id: 2, name: 'Aliment pondeuses', category: 'aliments', quantity: 0, unit: 'kg', threshold: 400, lastUpdate: '' },
-  { id: 3, name: 'Maïs concassé', category: 'aliments', quantity: 0, unit: 'kg', threshold: 600, lastUpdate: '' },
-  { id: 4, name: 'Vaccin Newcastle', category: 'vaccins', quantity: 0, unit: 'doses', threshold: 50, lastUpdate: '' },
-  { id: 5, name: 'Vaccin Gumboro', category: 'vaccins', quantity: 0, unit: 'doses', threshold: 80, lastUpdate: '' },
-  { id: 6, name: 'Antibiotiques', category: 'vaccins', quantity: 0, unit: 'flacons', threshold: 30, lastUpdate: '' },
-  { id: 7, name: 'Œufs frais (plateau)', category: 'oeufs', quantity: 0, unit: 'plateaux', threshold: 100, lastUpdate: '' },
-  { id: 8, name: 'Œufs calibrés gros', category: 'oeufs', quantity: 0, unit: 'plateaux', threshold: 50, lastUpdate: '' },
-];
 
 const categoryIcons = { aliments: Package, vaccins: Pill, oeufs: Egg };
 const categoryLabels = { aliments: 'Aliments', vaccins: 'Vaccins', oeufs: 'Œufs' };
 
 const Stocks = () => {
-  const [stocks, setStocks] = useState<StockItem[]>(initialStocks);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [showAddForm, setShowAddForm] = useState(false);
+  const queryClient = useQueryClient();
+
+  const { data: stocksResp } = useQuery({
+    queryKey: ['stock-items'],
+    queryFn: () => api.get<PaginatedResponse<StockItem>>('/api/stock-items'),
+  });
+
+  const stocks = stocksResp?.data ?? [];
+
+  const updateStockMutation = useMutation({
+    mutationFn: (payload: { id: number; quantity: number }) =>
+      api.patch<StockItem>(`/api/stock-items/${payload.id}/quantity`, {
+        quantity: payload.quantity,
+      }),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['stock-items'] });
+    },
+  });
 
   const getStatus = (item: StockItem) => item.quantity >= item.threshold ? 'optimal' : 'critique';
   const filteredStocks = selectedCategory === 'all' ? stocks : stocks.filter(s => s.category === selectedCategory);
 
   const updateQuantity = (id: number, delta: number) => {
-    setStocks(stocks.map(s => s.id === id ? { ...s, quantity: Math.max(0, s.quantity + delta), lastUpdate: new Date().toISOString().split('T')[0] } : s));
+    const item = stocks.find(s => s.id === id);
+    if (!item) return;
+    const nextQty = Math.max(0, item.quantity + delta);
+    updateStockMutation.mutate({ id, quantity: nextQty });
   };
 
   const criticalCount = stocks.filter(s => getStatus(s) === 'critique').length;
@@ -42,7 +55,7 @@ const Stocks = () => {
     exportToCSV(stocks.map(s => ({
       Nom: s.name, Catégorie: categoryLabels[s.category], Quantité: s.quantity,
       Unité: s.unit, Seuil: s.threshold, Statut: getStatus(s) === 'optimal' ? 'Optimal' : 'Critique',
-      'Dernière MAJ': s.lastUpdate || '-',
+      'Dernière MAJ': s.last_update || '-',
     })), 'stocks');
   };
 
@@ -63,8 +76,27 @@ const Stocks = () => {
     <div className="animate-slide-in space-y-6">
       <div className="flex items-center justify-between gap-3">
         <Header title="Stocks" />
-        <ExportBar onExportCSV={handleExportCSV} onPrint={handlePrint} />
+        <div className="flex items-center gap-3">
+          <Button 
+            onClick={() => setShowAddForm(true)}
+            className="rounded-xl btn-press text-xs h-9"
+          >
+            <Plus size={14} className="mr-2" />
+            Ajouter un article
+          </Button>
+          <ExportBar onExportCSV={handleExportCSV} onPrint={handlePrint} />
+        </div>
       </div>
+
+      {/* Add Stock Form */}
+      {showAddForm && (
+        <div className="flex justify-center">
+          <StockForm 
+            onSuccess={() => setShowAddForm(false)}
+            onCancel={() => setShowAddForm(false)}
+          />
+        </div>
+      )}
 
       {/* Status Overview */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4">

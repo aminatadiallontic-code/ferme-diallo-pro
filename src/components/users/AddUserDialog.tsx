@@ -19,15 +19,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { useAuth, UserRole } from '@/contexts/AuthContext';
+import type { UserRole } from '@/contexts/AuthContext';
+import { api } from '@/lib/api';
 import { useToast } from '@/hooks/use-toast';
+import { useMutation } from '@tanstack/react-query';
 
 interface AddUserDialogProps {
   onUserAdded: () => void;
 }
 
 const AddUserDialog = ({ onUserAdded }: AddUserDialogProps) => {
-  const { addUser } = useAuth();
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({
@@ -50,25 +51,54 @@ const AddUserDialog = ({ onUserAdded }: AddUserDialogProps) => {
     return Object.keys(errs).length === 0;
   };
 
+  const createUserMutation = useMutation({
+    mutationFn: (payload: { name: string; email: string; password: string; role: UserRole }) =>
+      api.post('/api/users', payload),
+    onSuccess: async () => {
+      toast({
+        title: 'Utilisateur ajouté',
+        description: `${form.name} a été ajouté en tant que ${form.role === 'fermier' ? 'Administrateur' : 'Gestionnaire'}.`,
+      });
+
+      setForm({ name: '', email: '', password: '', role: '' });
+      setErrors({});
+      setOpen(false);
+      onUserAdded();
+    },
+    onError: (err: unknown) => {
+      const raw = err instanceof Error ? err.message : String(err);
+      let message = raw;
+
+      try {
+        const parsed = JSON.parse(raw) as { message?: string; errors?: Record<string, string[] | string> };
+        if (parsed?.message) {
+          message = parsed.message;
+        } else if (parsed?.errors) {
+          const firstKey = Object.keys(parsed.errors)[0];
+          const first = firstKey ? parsed.errors[firstKey] : undefined;
+          message = Array.isArray(first) ? first[0] : (first ? String(first) : raw);
+        }
+      } catch {
+        // ignore
+      }
+
+      toast({
+        title: "Échec de l'ajout",
+        description: message,
+        variant: 'destructive',
+      });
+    },
+  });
+
   const handleSubmit = () => {
     if (!validate()) return;
 
-    addUser({
+    createUserMutation.mutate({
       name: form.name.trim(),
       email: form.email.trim(),
       password: form.password,
       role: form.role as UserRole,
     });
-
-    toast({
-      title: 'Utilisateur ajouté',
-      description: `${form.name} a été ajouté en tant que ${form.role === 'fermier' ? 'Administrateur' : 'Gestionnaire'}.`,
-    });
-
-    setForm({ name: '', email: '', password: '', role: '' });
-    setErrors({});
-    setOpen(false);
-    onUserAdded();
   };
 
   const resetForm = () => {
@@ -143,7 +173,11 @@ const AddUserDialog = ({ onUserAdded }: AddUserDialogProps) => {
           <DialogClose asChild>
             <Button variant="outline" className="rounded-xl">Annuler</Button>
           </DialogClose>
-          <Button onClick={handleSubmit} className="rounded-xl bg-success hover:bg-success/90 text-white">
+          <Button
+            onClick={handleSubmit}
+            disabled={createUserMutation.isPending}
+            className="rounded-xl bg-success hover:bg-success/90 text-white"
+          >
             Ajouter
           </Button>
         </DialogFooter>

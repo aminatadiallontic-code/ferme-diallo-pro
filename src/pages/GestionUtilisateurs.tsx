@@ -9,6 +9,8 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { exportToCSV, printSection } from '@/lib/exportUtils';
+import { api, type PaginatedResponse } from '@/lib/api';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
@@ -20,49 +22,70 @@ import {
 
 interface User {
   id: number; name: string; email: string;
-  role: 'Administrateur' | 'Gestionnaire'; status: 'Actif' | 'Inactif'; lastActivity: string;
+  role: 'fermier' | 'gestionnaire';
+  status: 'actif' | 'inactif';
 }
 
 const roleColors: Record<string, string> = {
-  'Administrateur': 'bg-success/10 text-success',
-  'Gestionnaire': 'bg-primary/10 text-primary',
+  fermier: 'bg-success/10 text-success',
+  gestionnaire: 'bg-primary/10 text-primary',
 };
 
 const statusColors: Record<string, string> = {
-  'Actif': 'bg-success/10 text-success',
-  'Inactif': 'bg-muted text-muted-foreground',
+  actif: 'bg-success/10 text-success',
+  inactif: 'bg-muted text-muted-foreground',
 };
 
 const GestionUtilisateurs = () => {
-  const { hasAccess, getAllUsers, removeUser, toggleUserStatus, getResetRequests, approveResetRequest, rejectResetRequest } = useAuth();
-  const [users, setUsers] = useState<User[]>([]);
+  const { hasAccess, getResetRequests, approveResetRequest, rejectResetRequest } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
   const [deleteTarget, setDeleteTarget] = useState<User | null>(null);
   const [resetRequests, setResetRequests] = useState<PasswordResetRequest[]>([]);
 
+  const queryClient = useQueryClient();
+
+  const { data: usersResp } = useQuery({
+    queryKey: ['users', searchQuery],
+    queryFn: () => {
+      const q = searchQuery.trim();
+      const url = q ? `/api/users?q=${encodeURIComponent(q)}&per_page=200` : '/api/users?per_page=200';
+      return api.get<PaginatedResponse<User>>(url);
+    },
+  });
+
+  const users = usersResp?.data ?? [];
+
+  const updateStatusMutation = useMutation({
+    mutationFn: (payload: { id: number; status: 'actif' | 'inactif' }) =>
+      api.patch<User>(`/api/users/${payload.id}/status`, { status: payload.status }),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['users'] });
+    },
+  });
+
+  const deleteUserMutation = useMutation({
+    mutationFn: (id: number) => api.delete(`/api/users/${id}`),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['users'] });
+      setDeleteTarget(null);
+    },
+  });
+
   const loadUsers = () => {
-    const allCreds = getAllUsers();
-    const mapped: User[] = allCreds.map((u, i) => ({
-      id: i + 1, name: u.name, email: u.email,
-      role: u.role === 'fermier' ? 'Administrateur' : 'Gestionnaire',
-      status: (u.status === 'inactif' ? 'Inactif' : 'Actif') as 'Actif' | 'Inactif',
-      lastActivity: new Date().toISOString().split('T')[0],
-    }));
-    setUsers(mapped);
     setResetRequests(getResetRequests());
+    queryClient.invalidateQueries({ queryKey: ['users'] });
   };
 
-  useEffect(() => { loadUsers(); }, []);
+  useEffect(() => { setResetRequests(getResetRequests()); }, []);
 
   if (!hasAccess('utilisateurs')) return <Navigate to="/dashboard/clients" replace />;
 
-  const filteredUsers = users.filter(user =>
-    user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    user.email.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredUsers = users;
 
   const handleDelete = () => {
-    if (deleteTarget) { removeUser(deleteTarget.email); loadUsers(); setDeleteTarget(null); }
+    if (deleteTarget) {
+      deleteUserMutation.mutate(deleteTarget.id);
+    }
   };
 
   const handleApproveReset = (email: string) => {
@@ -78,13 +101,16 @@ const GestionUtilisateurs = () => {
   };
 
   const totalUsers = users.length;
-  const activeUsers = users.filter(u => u.status === 'Actif').length;
-  const admins = users.filter(u => u.role === 'Administrateur').length;
-  const gestionnaires = users.filter(u => u.role === 'Gestionnaire').length;
+  const activeUsers = users.filter(u => u.status === 'actif').length;
+  const admins = users.filter(u => u.role === 'fermier').length;
+  const gestionnaires = users.filter(u => u.role === 'gestionnaire').length;
 
   const handleExportCSV = () => {
     exportToCSV(users.map(u => ({
-      Nom: u.name, Email: u.email, Rôle: u.role, Statut: u.status,
+      Nom: u.name,
+      Email: u.email,
+      Rôle: u.role === 'fermier' ? 'Administrateur' : 'Gestionnaire',
+      Statut: u.status === 'actif' ? 'Actif' : 'Inactif',
     })), 'utilisateurs');
   };
 
@@ -97,7 +123,7 @@ const GestionUtilisateurs = () => {
         <div class="stat-box"><div class="label">Gestionnaires</div><div class="value">${gestionnaires}</div></div>
       </div>
       <table><thead><tr><th>Nom</th><th>Email</th><th>Rôle</th><th>Statut</th></tr></thead><tbody>
-        ${users.map(u => `<tr><td>${u.name}</td><td>${u.email}</td><td>${u.role}</td><td class="${u.status === 'Actif' ? 'positive' : 'negative'}">${u.status}</td></tr>`).join('')}
+        ${users.map(u => `<tr><td>${u.name}</td><td>${u.email}</td><td>${u.role === 'fermier' ? 'Administrateur' : 'Gestionnaire'}</td><td class="${u.status === 'actif' ? 'positive' : 'negative'}">${u.status === 'actif' ? 'Actif' : 'Inactif'}</td></tr>`).join('')}
       </tbody></table>
     `);
   };
@@ -207,12 +233,20 @@ const GestionUtilisateurs = () => {
                     </div>
                   </TableCell>
                   <TableCell>
-                    <span className={`inline-flex px-2.5 py-0.5 rounded-full text-[11px] font-semibold ${roleColors[user.role]}`}>{user.role}</span>
+                    <span className={`inline-flex px-2.5 py-0.5 rounded-full text-[11px] font-semibold ${roleColors[user.role]}`}>{user.role === 'fermier' ? 'Administrateur' : 'Gestionnaire'}</span>
                   </TableCell>
                   <TableCell className="hidden sm:table-cell">
                     <div className="flex items-center gap-2">
-                      <Switch checked={user.status === 'Actif'} onCheckedChange={() => { toggleUserStatus(user.email); loadUsers(); }} />
-                      <span className={`inline-flex px-2.5 py-0.5 rounded-full text-[11px] font-semibold ${statusColors[user.status]}`}>{user.status}</span>
+                      <Switch
+                        checked={user.status === 'actif'}
+                        onCheckedChange={(checked) => {
+                          updateStatusMutation.mutate({
+                            id: user.id,
+                            status: checked ? 'actif' : 'inactif',
+                          });
+                        }}
+                      />
+                      <span className={`inline-flex px-2.5 py-0.5 rounded-full text-[11px] font-semibold ${statusColors[user.status]}`}>{user.status === 'actif' ? 'Actif' : 'Inactif'}</span>
                     </div>
                   </TableCell>
                   <TableCell>

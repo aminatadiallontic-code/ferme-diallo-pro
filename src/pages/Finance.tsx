@@ -1,11 +1,13 @@
 import { useState } from 'react';
-import { TrendingUp, TrendingDown, Wallet, Plus, ArrowUpRight, ArrowDownRight, Receipt } from 'lucide-react';
+import { TrendingUp, TrendingDown, Wallet, Plus, ArrowUpRight, ArrowDownRight, Receipt, Trash2 } from 'lucide-react';
 import Header from '@/components/layout/Header';
 import ExportBar from '@/components/ExportBar';
 import { useAuth } from '@/contexts/AuthContext';
 import { Navigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { exportToCSV, printSection } from '@/lib/exportUtils';
+import { api, type PaginatedResponse } from '@/lib/api';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger,
 } from '@/components/ui/dialog';
@@ -22,11 +24,50 @@ interface Transaction {
 
 const Finance = () => {
   const { hasAccess } = useAuth();
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [newTransaction, setNewTransaction] = useState({ type: 'revenu' as 'revenu' | 'depense', description: '', amount: '', category: '' });
+  const [filterType, setFilterType] = useState<'all' | 'revenu' | 'depense'>('all');
+  const [filterCategory, setFilterCategory] = useState('');
+  const [filterFrom, setFilterFrom] = useState('');
+  const [filterTo, setFilterTo] = useState('');
+  const queryClient = useQueryClient();
 
   if (!hasAccess('finance')) return <Navigate to="/dashboard/clients" replace />;
+
+  const { data: transactionsResp } = useQuery({
+    queryKey: ['transactions', filterType, filterCategory, filterFrom, filterTo],
+    queryFn: () => {
+      const params = new URLSearchParams();
+
+      if (filterType !== 'all') params.set('type', filterType);
+      if (filterCategory.trim()) params.set('category', filterCategory.trim());
+      if (filterFrom) params.set('from', filterFrom);
+      if (filterTo) params.set('to', filterTo);
+
+      params.set('per_page', '200');
+
+      return api.get<PaginatedResponse<Transaction>>(`/api/transactions?${params.toString()}`);
+    },
+  });
+
+  const transactions = transactionsResp?.data ?? [];
+
+  const createTransactionMutation = useMutation({
+    mutationFn: (payload: { type: 'revenu' | 'depense'; description: string; amount: number; date: string; category: string }) =>
+      api.post<Transaction>('/api/transactions', payload),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['transactions'] });
+      setNewTransaction({ type: 'revenu', description: '', amount: '', category: '' });
+      setIsOpen(false);
+    },
+  });
+
+  const deleteTransactionMutation = useMutation({
+    mutationFn: (id: number) => api.delete(`/api/transactions/${id}`),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['transactions'] });
+    },
+  });
 
   const totalRevenus = transactions.filter(t => t.type === 'revenu').reduce((sum, t) => sum + t.amount, 0);
   const totalDepenses = transactions.filter(t => t.type === 'depense').reduce((sum, t) => sum + t.amount, 0);
@@ -35,13 +76,13 @@ const Finance = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const transaction: Transaction = {
-      id: Date.now(), type: newTransaction.type, description: newTransaction.description,
-      amount: parseInt(newTransaction.amount), date: new Date().toISOString().split('T')[0], category: newTransaction.category,
-    };
-    setTransactions([transaction, ...transactions]);
-    setNewTransaction({ type: 'revenu', description: '', amount: '', category: '' });
-    setIsOpen(false);
+    createTransactionMutation.mutate({
+      type: newTransaction.type,
+      description: newTransaction.description,
+      amount: parseInt(newTransaction.amount),
+      date: new Date().toISOString().split('T')[0],
+      category: newTransaction.category,
+    });
   };
 
   const handleExportCSV = () => {
@@ -145,6 +186,65 @@ const Finance = () => {
           </Dialog>
         </div>
 
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-3 mb-5">
+          <div className="space-y-1">
+            <Label className="text-xs font-medium">Type</Label>
+            <Select value={filterType} onValueChange={(v: 'all' | 'revenu' | 'depense') => setFilterType(v)}>
+              <SelectTrigger className="h-11 rounded-xl"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Tous</SelectItem>
+                <SelectItem value="revenu">Revenu</SelectItem>
+                <SelectItem value="depense">Dépense</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-1">
+            <Label className="text-xs font-medium">Catégorie</Label>
+            <Input
+              value={filterCategory}
+              onChange={(e) => setFilterCategory(e.target.value)}
+              placeholder="Ex: Ventes"
+              className="h-11 rounded-xl"
+            />
+          </div>
+
+          <div className="space-y-1">
+            <Label className="text-xs font-medium">Du</Label>
+            <Input
+              type="date"
+              value={filterFrom}
+              onChange={(e) => setFilterFrom(e.target.value)}
+              className="h-11 rounded-xl"
+            />
+          </div>
+
+          <div className="space-y-1">
+            <Label className="text-xs font-medium">Au</Label>
+            <Input
+              type="date"
+              value={filterTo}
+              onChange={(e) => setFilterTo(e.target.value)}
+              className="h-11 rounded-xl"
+            />
+          </div>
+
+          <div className="md:col-span-4 flex justify-end">
+            <Button
+              variant="outline"
+              className="rounded-xl"
+              onClick={() => {
+                setFilterType('all');
+                setFilterCategory('');
+                setFilterFrom('');
+                setFilterTo('');
+              }}
+            >
+              Réinitialiser
+            </Button>
+          </div>
+        </div>
+
         {transactions.length === 0 ? (
           <div className="empty-state">
             <div className="empty-state-icon"><Receipt size={24} /></div>
@@ -164,9 +264,19 @@ const Finance = () => {
                     <p className="text-[11px] text-muted-foreground">{t.category} · {new Date(t.date).toLocaleDateString('fr-FR')}</p>
                   </div>
                 </div>
-                <p className={`font-bold text-[13px] whitespace-nowrap ${t.type === 'revenu' ? 'text-success' : 'text-destructive'}`}>
-                  {t.type === 'revenu' ? '+' : '-'} {formatAmount(t.amount)}
-                </p>
+                <div className="flex items-center gap-2">
+                  <p className={`font-bold text-[13px] whitespace-nowrap ${t.type === 'revenu' ? 'text-success' : 'text-destructive'}`}>
+                    {t.type === 'revenu' ? '+' : '-'} {formatAmount(t.amount)}
+                  </p>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10 rounded-lg"
+                    onClick={() => deleteTransactionMutation.mutate(t.id)}
+                  >
+                    <Trash2 size={15} />
+                  </Button>
+                </div>
               </div>
             ))}
           </div>

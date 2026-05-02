@@ -1,7 +1,7 @@
 import { NavLink, useNavigate } from 'react-router-dom';
 import { 
   Users, Wallet, Settings, BarChart3, Package, LogOut,
-  LayoutDashboard, UserCheck, Bell
+  LayoutDashboard, UserCheck, Bell, ShoppingCart
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -20,6 +20,7 @@ const Sidebar = ({ isMobile = false, onNavClick }: SidebarProps) => {
     { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard', section: 'dashboard' },
     { icon: Users, label: 'Utilisateurs', path: '/dashboard/utilisateurs', section: 'utilisateurs' },
     { icon: UserCheck, label: 'Clients', path: '/dashboard/clients', section: 'clients' },
+    { icon: ShoppingCart, label: 'Commandes', path: '/dashboard/commandes', section: 'commandes' },
     { icon: Wallet, label: 'Finance', path: '/dashboard/finance', section: 'finance' },
     { icon: Package, label: 'Stocks', path: '/dashboard/stocks', section: 'stocks' },
     { icon: BarChart3, label: 'Rapports', path: '/dashboard/rapports', section: 'rapports' },
@@ -29,9 +30,9 @@ const Sidebar = ({ isMobile = false, onNavClick }: SidebarProps) => {
 
   const navItems = allNavItems.filter(item => hasAccess(item.section));
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     onNavClick?.();
-    logout();
+    await logout();
     navigate('/');
   };
 
@@ -52,7 +53,7 @@ const Sidebar = ({ isMobile = false, onNavClick }: SidebarProps) => {
               Ferme Diallo
             </h1>
             <p className="text-[11px] text-sidebar-muted capitalize leading-tight mt-0.5">
-              {user?.role === 'fermier' ? 'Administrateur' : user?.role || 'Utilisateur'}
+              {user?.role === 'fermier' ? 'Administrateur' : user?.role === 'gestionnaire' ? 'Gestionnaire' : user?.role === 'client' ? 'Client' : user?.role || 'Utilisateur'}
             </p>
           </div>
         </div>

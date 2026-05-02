@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate, Navigate } from 'react-router-dom';
 import { Mail, Lock, Eye, EyeOff, ArrowLeft, Send } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { api } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -17,11 +18,11 @@ const Login = () => {
   const [showResetForm, setShowResetForm] = useState(false);
   const [resetEmail, setResetEmail] = useState('');
 
-  const { login, isAuthenticated, requestPasswordReset } = useAuth();
+  const { login, isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
   if (isAuthenticated) {
-    return <Navigate to="/dashboard" replace />;
+    return <Navigate to={'/dashboard'} replace />;
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -29,7 +30,7 @@ const Login = () => {
     setError('');
     setIsLoading(true);
     await new Promise(resolve => setTimeout(resolve, 500));
-    const result = login(email, password);
+    const result = await login(email, password);
     if (result) {
       navigate('/dashboard');
     } else {
@@ -38,7 +39,7 @@ const Login = () => {
     setIsLoading(false);
   };
 
-  const handleResetRequest = (e: React.FormEvent) => {
+  const handleResetRequest = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setSuccess('');
@@ -46,12 +47,19 @@ const Login = () => {
       setError('Veuillez entrer votre adresse email.');
       return;
     }
-    const sent = requestPasswordReset(resetEmail);
-    if (sent) {
-      setSuccess("Demande envoyée ! L'administrateur doit approuver la réinitialisation.");
+
+    try {
+      const resp = await api.post<{ message?: string }>('/api/auth/forgot-password', { email: resetEmail.trim() });
+      setSuccess(resp?.message ? String(resp.message) : 'Lien de réinitialisation envoyé.');
       setResetEmail('');
-    } else {
-      setError('Aucun compte trouvé avec cette adresse email.');
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      try {
+        const parsed = JSON.parse(message) as { message?: string };
+        setError(parsed?.message ? String(parsed.message) : 'Impossible d\'envoyer le lien de réinitialisation.');
+      } catch {
+        setError(message || 'Impossible d\'envoyer le lien de réinitialisation.');
+      }
     }
   };
 
